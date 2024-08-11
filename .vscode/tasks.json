@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "BuildDebug",
+			"linux": {
+				"command": "cmake -S . -B build && cmake --build build",
+			},
+			"problemMatcher": []
+		}
+	]
+}
