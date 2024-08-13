@@ -87,9 +87,9 @@ void OnResize(uint64_t& width, uint64_t& height) {
 void CameraOnUpdate(Camera2D& camera) {
     const float scroll = GetMouseWheelMove();
 
-    if (scroll < 0.0f && camera.zoom > 0.5f) {
+    if ((scroll < 0.0f || IsKeyDown(KEY_MINUS)) && camera.zoom > 0.5f) {
         camera.zoom -= 0.5f;
-    } else if (scroll > 0.0f && camera.zoom <= 100.0f) {
+    } else if ((scroll > 0.0f || IsKeyDown(KEY_EQUAL)) && camera.zoom <= 100.0f) {
         camera.zoom += 0.5f;
     }
 
