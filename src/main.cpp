@@ -9,6 +9,7 @@
 // TODO: drag and drop image and view all images in tht directory
 // TODO: config file
 // TODO: the image from camera are rotated; fix this
+// TODO: multithreading (load images in batches in the background and clear the images accordingly)
 
 struct ImageDetails {
     Texture2D texture;
@@ -36,7 +37,9 @@ int main() {
         } else if (!std::filesystem::is_regular_file(file)) {
             continue;
         }
+        // TODO: check if the file is an image or not
 
+        // FIXME: the images take a long time to load
         const Image imgData = LoadImage(file.path().c_str());
         imgTextures.push_back({
             LoadTextureFromImage(imgData),
