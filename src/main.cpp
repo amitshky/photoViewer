@@ -31,7 +31,12 @@ int main() {
     std::vector<ImageDetails> imgTextures{};
     std::string path = "test/";
     for (const auto& file : std::filesystem::directory_iterator(path)) {
-        // TODO: check if the directory contains other directories
+        if (std::filesystem::is_directory(file)) {
+            continue;
+        } else if (!std::filesystem::is_regular_file(file)) {
+            continue;
+        }
+
         const Image imgData = LoadImage(file.path().c_str());
         imgTextures.push_back({
             LoadTextureFromImage(imgData),
