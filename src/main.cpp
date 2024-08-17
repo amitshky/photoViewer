@@ -3,13 +3,16 @@
 #include <vector>
 #include "raylib.h"
 
+// TODO: pass arguments and make the app open even if no images are present
+// TODO: delete (move to a folder like ".trash" or something) corresponding raw file if available
 // TODO: hot reloading
-// TODO: drag and drop image and view all images in tht directory
-// TODO: config file
-// TODO: the image from camera are rotated; fix this
-// TODO: read file metadata
 // TODO: multithreading (load images in batches in the background and clear the images accordingly)
-// TODO: pass arguments
+// TODO: scroll zoom to mouse position
+// TODO: switch directory using TAB/SHIFT-TAB (i.e., load images from sibling directory)
+// TODO: make raw file extension, path configurable
+// TODO: config file
+
+// FIXME: the image from camera are rotated; read file metadata
 
 struct ImageDetails {
 public:
@@ -58,8 +61,27 @@ int main(int argc, char* argv[]) {
         } else if (!std::filesystem::is_regular_file(file)) {
             continue;
         }
-        // TODO: check if the file is an image or not
-        imgTextures.push_back(ImageDetails{ file.path().c_str() });
+        // check if the file is png/jpg or not
+        const char* path = file.path().c_str();
+        const std::string ext = GetFileExtension(path);
+        if (ext != ".png"  &&
+            ext != ".PNG"  &&
+            ext != ".jpg"  &&
+            ext != ".JPG"  &&
+            ext != ".jpeg" &&
+            ext != ".JPEG"
+        ) {
+            continue;
+        }
+
+        imgTextures.emplace_back(path);
+    }
+
+    // TODO: temporary (remove this later when you can open the app on its own without needing an image in the directory)
+    if (imgTextures.size() == 0) {
+        TraceLog(LOG_ERROR, "No images found in the current directory!");
+        CloseWindow();
+        std::exit(-1);
     }
 
     int64_t currentImageIdx = 0;
@@ -136,9 +158,9 @@ void ProcessKeybindings(const std::vector<ImageDetails>& imgTextures, Camera2D& 
     } else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && currentImageIdx - 1 >= 0) { // "A" or "Left arrow" to view previous image
         --currentImageIdx;
         CalcDstImageAspects(imgDstRec, imgTextures[currentImageIdx].aspectRatio, winAspectRatio, width, height);
-    } else if (IsKeyPressed(KEY_F)) {
+    } else if (IsKeyPressed(KEY_F)) { // "F" to toggle fullscreen
         ToggleFullscreen();
-        int monitor = GetCurrentMonitor();
+        const int monitor = GetCurrentMonitor();
         SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
         OnResize(camera, imgDstRec, width, height, winAspectRatio, imgTextures[currentImageIdx].aspectRatio);
     }
