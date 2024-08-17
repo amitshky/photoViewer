@@ -36,7 +36,7 @@ public:
 };
 
 void OnResize(Camera2D& camera, Rectangle& imgDstRec, uint64_t& width, uint64_t& height, float& winAspectRatio, const float imgAspectRatio);
-void ProcessKeybindings(const std::vector<ImageDetails>& imgTextures, Camera2D& camera, Rectangle& imgDstRec, int64_t& currentImageIdx, uint64_t width, uint64_t height, float winAspectRatio);
+void ProcessKeybindings(const std::vector<ImageDetails>& imgTextures, Camera2D& camera, Rectangle& imgDstRec, int64_t& currentImageIdx, uint64_t& width, uint64_t& height, float& winAspectRatio);
 void CalcDstImageAspects(Rectangle& imgDstRec, const float imgAspectRatio, const float winAspectRatio, const float width, const float height);
 void OnFilesDropped(std::vector<ImageDetails>& imgTextures, int64_t& currImgIdx);
 
@@ -108,7 +108,7 @@ void OnResize(Camera2D& camera, Rectangle& imgDstRec, uint64_t& width, uint64_t&
     CalcDstImageAspects(imgDstRec, imgAspectRatio, winAspectRatio, width, height);
 }
 
-void ProcessKeybindings(const std::vector<ImageDetails>& imgTextures, Camera2D& camera, Rectangle& imgDstRec, int64_t& currentImageIdx, uint64_t width, uint64_t height, float winAspectRatio) {
+void ProcessKeybindings(const std::vector<ImageDetails>& imgTextures, Camera2D& camera, Rectangle& imgDstRec, int64_t& currentImageIdx, uint64_t& width, uint64_t& height, float& winAspectRatio) {
     const float scroll = GetMouseWheelMove();
 
     if ((scroll < 0.0f || IsKeyDown(KEY_MINUS)) && camera.zoom > 0.5f) { // "scroll down" or "-" to zoom out
@@ -136,6 +136,11 @@ void ProcessKeybindings(const std::vector<ImageDetails>& imgTextures, Camera2D& 
     } else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && currentImageIdx - 1 >= 0) { // "A" or "Left arrow" to view previous image
         --currentImageIdx;
         CalcDstImageAspects(imgDstRec, imgTextures[currentImageIdx].aspectRatio, winAspectRatio, width, height);
+    } else if (IsKeyPressed(KEY_F)) {
+        ToggleFullscreen();
+        int monitor = GetCurrentMonitor();
+        SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+        OnResize(camera, imgDstRec, width, height, winAspectRatio, imgTextures[currentImageIdx].aspectRatio);
     }
 }
 
