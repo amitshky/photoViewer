@@ -1,4 +1,3 @@
-#include <cstdint>
 #include <string>
 #include <filesystem>
 #include <vector>
@@ -10,6 +9,7 @@
 // TODO: the image from camera are rotated; fix this
 // TODO: read file metadata
 // TODO: multithreading (load images in batches in the background and clear the images accordingly)
+// TODO: pass arguments
 
 struct ImageDetails {
 public:
@@ -40,14 +40,14 @@ void ProcessKeybindings(const std::vector<ImageDetails>& imgTextures, Camera2D& 
 void CalcDstImageAspects(Rectangle& imgDstRec, const float imgAspectRatio, const float winAspectRatio, const float width, const float height);
 void OnFilesDropped(std::vector<ImageDetails>& imgTextures, int64_t& currImgIdx);
 
-int main() {
+int main(int argc, char* argv[]) {
     uint64_t width = 640;
     uint64_t height = 480;
     float winAspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(width, height, "Photo Viewer");
-    SetExitKey(KEY_Q);
+    SetExitKey(KEY_Q); // "Q" to exit
     SetTargetFPS(60);
 
     std::vector<ImageDetails> imgTextures{};
@@ -111,9 +111,9 @@ void OnResize(Camera2D& camera, Rectangle& imgDstRec, uint64_t& width, uint64_t&
 void ProcessKeybindings(const std::vector<ImageDetails>& imgTextures, Camera2D& camera, Rectangle& imgDstRec, int64_t& currentImageIdx, uint64_t width, uint64_t height, float winAspectRatio) {
     const float scroll = GetMouseWheelMove();
 
-    if ((scroll < 0.0f || IsKeyDown(KEY_MINUS)) && camera.zoom > 0.5f) {
+    if ((scroll < 0.0f || IsKeyDown(KEY_MINUS)) && camera.zoom > 0.5f) { // "scroll down" or "-" to zoom out
         camera.zoom -= 0.5f;
-    } else if ((scroll > 0.0f || IsKeyDown(KEY_EQUAL)) && camera.zoom <= 100.0f) {
+    } else if ((scroll > 0.0f || IsKeyDown(KEY_EQUAL)) && camera.zoom <= 100.0f) { // "scroll up" or "+" to zoom in
         camera.zoom += 0.5f;
     } else if (IsKeyPressed(KEY_ZERO)) { // "0" to reset zoom
         camera.zoom = 1.0f;
@@ -130,10 +130,10 @@ void ProcessKeybindings(const std::vector<ImageDetails>& imgTextures, Camera2D& 
         camera.target = Vector2{ 0.0f, 0.0f };
         camera.rotation = 0.0f;
         camera.zoom = 1.0f;
-    } else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && currentImageIdx + 1 < imgTextures.size()) {
+    } else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && currentImageIdx + 1 < imgTextures.size()) { // "D" or "Right arrow" to view next image
         ++currentImageIdx;
         CalcDstImageAspects(imgDstRec, imgTextures[currentImageIdx].aspectRatio, winAspectRatio, width, height);
-    } else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && currentImageIdx - 1 >= 0) {
+    } else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && currentImageIdx - 1 >= 0) { // "A" or "Left arrow" to view previous image
         --currentImageIdx;
         CalcDstImageAspects(imgDstRec, imgTextures[currentImageIdx].aspectRatio, winAspectRatio, width, height);
     }

@@ -5,7 +5,7 @@
 			"type": "shell",
 			"label": "BuildDebug",
 			"linux": {
-				"command": "cmake -S . -B build && cmake --build build",
+				"command": "cmake -S . -B build/dbg/ -DCMAKE_BUILD_TYPE=Debug && cmake --build build/dbg/ && cp build/dbg/compile_commands.json .",
 			},
 			"problemMatcher": []
 		}
