@@ -3,12 +3,18 @@
 #include <filesystem>
 #include "logger.hpp"
 #include "raylib.h"
-#include "utils.hpp"
 
-ImageViewport::ImageViewport(const char* path, const uint64_t width, const uint64_t height) {
-    // LoadImages();
-    // LoadImagesFromDirectory();
-
+ImageViewport::ImageViewport(const char* path,
+    const uint64_t width,
+    const uint64_t height,
+    const std::string& rawFilePath)
+    : _rawFilePath{rawFilePath},
+      _currentImageIdx{ 0 },
+      _dstRectangle{ 0.0f,  0.0f, 0.0f, 0.0f  },
+      _camera{},
+      _images{}
+    {
+    // TODO: use LoadFiles()
     const std::filesystem::directory_iterator dirItr{ path };
     for (const auto& file : dirItr) {
         if (std::filesystem::is_directory(file)) {
@@ -32,24 +38,12 @@ ImageViewport::ImageViewport(const char* path, const uint64_t width, const uint6
         _images.emplace_back(path);
     }
 
-    // TODO: temporary (remove this later when you can open the app on its own without needing an image in the directory)
     if (_images.size() == 0) {
-        logger::error("No images found in the current directory!");
-        CloseWindow();
-        std::exit(-1);
+        logger::info("No images found in the current directory!");
     }
 
-    _currentImageIdx = 0;
-    _dstRectangle = { 0.0f, 0.0f, 0.0f, 0.0f };
-    const float winAspectRatio = static_cast<float>(width) / static_cast<float>(height);
-    CalcDstImageAspects(_dstRectangle, _images[_currentImageIdx].aspectRatio, winAspectRatio, width, height);
-
-    _camera = {
-        .offset = Vector2{ static_cast<float>(width) * 0.5f, static_cast<float>(height) * 0.5f },
-        .target = Vector2{ 0.0f, 0.0f },
-        .rotation = 0.0f,
-        .zoom = 1.0f,
-    };
+    CalcDstRectangle(width, height);
+    ResetCamera(width, height);
 } 
 
 void ImageViewport::Display() {
@@ -57,8 +51,8 @@ void ImageViewport::Display() {
 
     if (_images.size() > 0) {
         // TODO: do something when there are no images
-        DrawTexturePro(_images[_currentImageIdx].texture,
-            _images[_currentImageIdx].srcRectangle,
+        DrawTexturePro(GetCurrentImage().texture,
+            GetCurrentImage().srcRectangle,
             _dstRectangle, 
             Vector2{ 0.0f, 0.0f },
             0.0f,
@@ -75,10 +69,8 @@ void ImageViewport::CleanupImages() {
     }
 }
 
-void ImageViewport::ProcessKeybindings(uint64_t& width,
-        uint64_t& height,
-        float& winAspectRatio,
-        const std::string& rawFilePath) {
+void ImageViewport::ProcessKeybindings(const uint64_t width,
+    const uint64_t height) {
     const float scroll = GetMouseWheelMove();
 
     if ((scroll < 0.0f || IsKeyDown(KEY_MINUS)) && _camera.zoom > 0.5f) { // "scroll down" or "-" to zoom out
@@ -96,48 +88,21 @@ void ImageViewport::ProcessKeybindings(uint64_t& width,
         _camera.rotation -= 90.0f;
         _camera.rotation = static_cast<float>(static_cast<int32_t>(_camera.rotation) % 360);
     } else if (IsKeyPressed(KEY_R)) { // "R" to reset camera
-        _camera.offset = Vector2{ static_cast<float>(width) * 0.5f, static_cast<float>(height) * 0.5f };
-        _camera.target = Vector2{ 0.0f, 0.0f };
-        _camera.rotation = 0.0f;
-        _camera.zoom = 1.0f;
+        ResetCamera(width, height);
     } else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && _currentImageIdx + 1 < _images.size()) { // "D" or "Right arrow" to view next image
         ++_currentImageIdx;
-        CalcDstImageAspects(_dstRectangle, _images[_currentImageIdx].aspectRatio, winAspectRatio, width, height);
+        CalcDstRectangle(width, height);
     } else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && _currentImageIdx - 1 >= 0) { // "A" or "Left arrow" to view previous image
         --_currentImageIdx;
-        CalcDstImageAspects(_dstRectangle, _images[_currentImageIdx].aspectRatio, winAspectRatio, width, height);
+        CalcDstRectangle(width, height);
     } else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) { // "Delete" or "X" to delete image as well as raw image (if exists)
-        const char* trash = "test/trash/";
-        // TODO: do not hardcode
-        if (!std::filesystem::exists(trash)) {
-            std::filesystem::create_directory(trash);
-        }
-
-        std::filesystem::path imagePath{ _images[_currentImageIdx].filepath };
-        std::filesystem::path rawImagePath{ rawFilePath + _images[_currentImageIdx].filenameNoExt + ".ARW" };
-
-        // move the files to `.trash`
-        std::filesystem::rename(imagePath, trash + _images[_currentImageIdx].filename);
-        logger::log("deleting: \"%s\"", imagePath.c_str());
-        if (std::filesystem::exists(rawImagePath)) {
-            logger::log("deleting: \"%s\"", rawImagePath.c_str());
-            std::filesystem::rename(rawImagePath, trash + _images[_currentImageIdx].filenameNoExt + ".ARW");
-        }
-
-        // FIXME: after deleting, the next image's aspect ratio is not loading correctly
-        _images.erase(_images.begin() + _currentImageIdx);
-        if (_currentImageIdx - 1 >= 0) {
-            --_currentImageIdx;
-        } else {
-            _currentImageIdx = 0;
-        }
-        CalcDstImageAspects(_dstRectangle, _images[_currentImageIdx].aspectRatio, winAspectRatio, width, height);
+        DeleteImage(width, height);
     }
 }
 
-void ImageViewport::Resize(uint64_t width, uint64_t height, float winAspectRatio) {
+void ImageViewport::Resize(const uint64_t width, const uint64_t height) {
     _camera.offset = Vector2{ static_cast<float>(width) * 0.5f, static_cast<float>(height) * 0.5f };
-    CalcDstImageAspects(_dstRectangle, _images[_currentImageIdx].aspectRatio, winAspectRatio, width, height);
+    CalcDstRectangle(width, height);
 }
 
 void ImageViewport::LoadFiles(const FilePathList& files) {
@@ -147,9 +112,69 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
         _images.reserve(files.count);
 
         for (uint64_t i = 0; i < files.count; ++i) {
+            // TODO: check if files are images
             _images.push_back(ImageDetails{ files.paths[i] });
         }
 
         _currentImageIdx = 0;
     }
+}
+
+void ImageViewport::CalcDstRectangle(const uint64_t width, const uint64_t height) {
+    if (_images.size() == 0)
+        return;
+
+    const float h = static_cast<float>(height);
+    const float w = static_cast<float>(width);
+    const float winAspectRatio = w / h;
+
+    if (GetCurrentImage().aspectRatio < winAspectRatio) {
+        _dstRectangle.x      = -h * 0.5f * GetCurrentImage().aspectRatio;
+        _dstRectangle.y      = -h * 0.5f;
+        _dstRectangle.width  = h * GetCurrentImage().aspectRatio;
+        _dstRectangle.height = h;
+    } else {
+        _dstRectangle.x      = -w * 0.5f;
+        _dstRectangle.y      = -w * 0.5f * 1.0f / GetCurrentImage().aspectRatio;
+        _dstRectangle.width  = w;
+        _dstRectangle.height = w * 1.0f / GetCurrentImage().aspectRatio;
+    }
+}
+
+void ImageViewport::DeleteImage(const uint64_t width, const uint64_t height) {
+    if (_images.size() == 0)
+        return;
+
+    // TODO: do not hardcode
+    const char* trash = "test/trash/";
+    if (!std::filesystem::exists(trash)) {
+        std::filesystem::create_directory(trash);
+    }
+
+    std::filesystem::path imagePath{ GetCurrentImage().filepath };
+    std::filesystem::path rawImagePath{ _rawFilePath + GetCurrentImage().filenameNoExt + ".ARW" };
+
+    // move the files to `.trash`
+    std::filesystem::rename(imagePath, trash + GetCurrentImage().filename);
+    logger::log("deleting: \"%s\"", imagePath.c_str());
+    if (std::filesystem::exists(rawImagePath)) {
+        logger::log("deleting: \"%s\"", rawImagePath.c_str());
+        std::filesystem::rename(rawImagePath, trash + GetCurrentImage().filenameNoExt + ".ARW");
+    }
+
+    // FIXME: after deleting, the next image's aspect ratio is not loading correctly
+    _images.erase(_images.begin() + _currentImageIdx);
+    if (_currentImageIdx - 1 >= 0) {
+        --_currentImageIdx;
+    } else {
+        _currentImageIdx = 0;
+    }
+    CalcDstRectangle(width, height);
+}
+
+void ImageViewport::ResetCamera(const uint64_t width,const uint64_t height) {
+    _camera.offset = Vector2{ static_cast<float>(width) * 0.5f, static_cast<float>(height) * 0.5f };
+    _camera.target = Vector2{ 0.0f, 0.0f };
+    _camera.rotation = 0.0f;
+    _camera.zoom = 1.0f;
 }

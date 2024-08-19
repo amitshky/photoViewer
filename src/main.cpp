@@ -17,24 +17,23 @@
 // FIXME: the images take a long time to load (maybe load textures from memory only on image change)
 
 
-void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height, float& winAspectRatio, const std::string& rawFilePath);
-void OnResize(ImageViewport& viewport, uint64_t& width, uint64_t& height, float& winAspectRatio);
+void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height);
+void OnResize(ImageViewport& viewport, uint64_t& width, uint64_t& height);
 void OnFilesDropped(ImageViewport& viewport);
 
 
 int main(int argc, char* argv[]) {
     uint64_t width = 640;
     uint64_t height = 480;
-    float winAspectRatio = static_cast<float>(width) / static_cast<float>(height);
-    std::string path = "test/pic/";
-    std::string rawFilePath = "test/raw/";
+    const std::string path = "test/pic/";
+    const std::string rawFilePath = "test/raw/";
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(width, height, "Photo Viewer");
     SetExitKey(KEY_Q); // "Q" to exit
     SetTargetFPS(60);
 
-    ImageViewport viewport{ path.c_str(), width, height };
+    ImageViewport viewport{ path.c_str(), width, height, rawFilePath };
 
     while(!WindowShouldClose())
     {
@@ -46,8 +45,8 @@ int main(int argc, char* argv[]) {
         DrawFPS(10, 10);
         EndDrawing();
 
-        viewport.ProcessKeybindings(width, height, winAspectRatio, rawFilePath);
-        OnResize(viewport, width, height, winAspectRatio);
+        ProcessInput(viewport, width, height);
+        OnResize(viewport, width, height);
         OnFilesDropped(viewport);
     }
 
@@ -55,25 +54,25 @@ int main(int argc, char* argv[]) {
     CloseWindow();
 }
 
-void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height, float& winAspectRatio, const std::string& rawFilePath) {
-    viewport.ProcessKeybindings(width, height, winAspectRatio, rawFilePath);
+void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
+    viewport.ProcessKeybindings(width, height);
 
     if (IsKeyPressed(KEY_F)) { // "F" to toggle fullscreen
         ToggleFullscreen();
         const int monitor = GetCurrentMonitor();
         SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-        OnResize(viewport, width, height, winAspectRatio);
+        OnResize(viewport, width, height);
     }
 }
 
-void OnResize(ImageViewport& viewport, uint64_t& width, uint64_t& height, float& winAspectRatio) {
+void OnResize(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
     if (!IsWindowResized())
         return;
 
     width = GetScreenWidth();
     height = GetScreenHeight();
-    winAspectRatio = static_cast<float>(width) / static_cast<float>(height);
-    viewport.Resize(width, height, winAspectRatio);
+    const float winAspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    viewport.Resize(width, height);
 }
 
 void OnFilesDropped(ImageViewport& viewport) {

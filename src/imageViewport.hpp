@@ -7,7 +7,10 @@
 
 class ImageViewport {
 public:
-    ImageViewport(const char* path, const uint64_t width, const uint64_t height);
+    ImageViewport(const char* path,
+        const uint64_t width,
+        const uint64_t height,
+        const std::string& rawFilePath);
 
     ImageViewport(const ImageViewport&) = delete;
     ImageViewport(ImageViewport&&) = delete;
@@ -16,16 +19,22 @@ public:
 
     void Display();
     void CleanupImages();
-    void ProcessKeybindings(uint64_t& width,
-        uint64_t& height,
-        float& winAspectRatio,
-        const std::string& rawFilePath);
-    void Resize(uint64_t width, uint64_t height, float winAspectRatio);
+    void ProcessKeybindings(const uint64_t width, const uint64_t height);
+    void Resize(const uint64_t width, const uint64_t height);
     void LoadFiles(const FilePathList& files);
 
 private:
-    std::vector<ImageDetails> _images;
+    inline ImageDetails GetCurrentImage() const { 
+        return _images[_currentImageIdx]; 
+    }
+    void CalcDstRectangle(const uint64_t width, const uint64_t height);
+    void DeleteImage(const uint64_t width, const uint64_t height);
+    void ResetCamera(const uint64_t width,const uint64_t height);
+
+private:
+    std::string _rawFilePath;
     int64_t _currentImageIdx;
+    Rectangle _dstRectangle; // to fit the image to the window
     Camera2D _camera;
-    Rectangle _dstRectangle; // used to display the texture in the viewport
+    std::vector<ImageDetails> _images;
 };
