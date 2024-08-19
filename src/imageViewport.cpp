@@ -38,7 +38,7 @@ ImageViewport::ImageViewport(const char* path,
         _images.emplace_back(path);
     }
 
-    if (_images.size() == 0) {
+    if (_images.empty()) {
         logger::info("No images found in the current directory!");
     }
 
@@ -121,7 +121,7 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
 }
 
 void ImageViewport::CalcDstRectangle(const uint64_t width, const uint64_t height) {
-    if (_images.size() == 0)
+    if (_images.empty())
         return;
 
     const float h = static_cast<float>(height);
@@ -142,7 +142,7 @@ void ImageViewport::CalcDstRectangle(const uint64_t width, const uint64_t height
 }
 
 void ImageViewport::DeleteImage(const uint64_t width, const uint64_t height) {
-    if (_images.size() == 0)
+    if (_images.empty())
         return;
 
     // TODO: do not hardcode
