@@ -8,7 +8,9 @@ ImageViewport::ImageViewport(const char* path,
     const uint64_t width,
     const uint64_t height,
     const std::string& rawFilePath)
-    : _rawFilePath{rawFilePath},
+    : _rawFilePath{ rawFilePath },
+      _windowWidth{ width },
+      _windowHeight{ height },
       _currentImageIdx{ 0 },
       _dstRectangle{ 0.0f,  0.0f, 0.0f, 0.0f },
       _camera{},
@@ -16,13 +18,7 @@ ImageViewport::ImageViewport(const char* path,
     {
     FilePathList files = LoadDirectoryFiles(path);
     LoadFiles(files);
-
-    if (_images.empty()) {
-        logger::info("No images found in the current directory!");
-    }
-
-    CalcDstRectangle(width, height);
-    ResetCamera(width, height);
+    ResetCamera();
 } 
 
 void ImageViewport::Display() {
@@ -48,8 +44,7 @@ void ImageViewport::CleanupImages() {
     }
 }
 
-void ImageViewport::ProcessKeybindings(const uint64_t width,
-    const uint64_t height) {
+void ImageViewport::ProcessKeybindings() {
     const float scroll = GetMouseWheelMove();
 
     if ((scroll < 0.0f || IsKeyDown(KEY_MINUS)) && _camera.zoom > 0.5f) { // "scroll down" or "-" to zoom out
@@ -67,63 +62,73 @@ void ImageViewport::ProcessKeybindings(const uint64_t width,
         _camera.rotation -= 90.0f;
         _camera.rotation = static_cast<float>(static_cast<int32_t>(_camera.rotation) % 360);
     } else if (IsKeyPressed(KEY_R)) { // "R" to reset camera
-        ResetCamera(width, height);
+        ResetCamera();
     } else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && _currentImageIdx + 1 < _images.size()) { // "D" or "Right arrow" to view next image
         ++_currentImageIdx;
-        CalcDstRectangle(width, height);
+        CalcDstRectangle();
     } else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && _currentImageIdx - 1 >= 0) { // "A" or "Left arrow" to view previous image
         --_currentImageIdx;
-        CalcDstRectangle(width, height);
+        CalcDstRectangle();
     } else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) { // "Delete" or "X" to delete image as well as raw image (if exists)
-        DeleteImage(width, height);
+        DeleteImage();
     }
 }
 
 void ImageViewport::Resize(const uint64_t width, const uint64_t height) {
+    _windowWidth = width;
+    _windowHeight = height;
     _camera.offset = Vector2{ static_cast<float>(width) * 0.5f, static_cast<float>(height) * 0.5f };
-    CalcDstRectangle(width, height);
+    CalcDstRectangle();
 }
 
 void ImageViewport::LoadFiles(const FilePathList& files) {
-    if (files.count > 0) {
-        CleanupImages();
+    if (files.count <= 0)
+        return;
+
+    CleanupImages();
+    if (!_images.empty()) {
         _images.clear();
         _images.reserve(files.count);
+    }
 
-        for (uint64_t i = 0; i < files.count; ++i) {
-            const char* path = files.paths[i];
+    for (uint64_t i = 0; i < files.count; ++i) {
+        const char* path = files.paths[i];
 
-            if (std::filesystem::is_directory(path)) {
-                continue;
-            } else if (!std::filesystem::is_regular_file(path)) {
-                continue;
-            }
-
-            // check if the file is png/jpg or not
-            const std::string ext = GetFileExtension(path);
-            if (ext != ".png"  &&
-                ext != ".PNG"  &&
-                ext != ".jpg"  &&
-                ext != ".JPG"  &&
-                ext != ".jpeg" &&
-                ext != ".JPEG"
-            ) {
-                continue;
-            }
-
-            _images.emplace_back(path);
+        if (std::filesystem::is_directory(path)) {
+            continue;
+        } else if (!std::filesystem::is_regular_file(path)) {
+            continue;
         }
 
-        _currentImageIdx = 0;
+        // check if the file is png/jpg or not
+        const std::string ext = GetFileExtension(path);
+        if (ext != ".png"  &&
+            ext != ".PNG"  &&
+            ext != ".jpg"  &&
+            ext != ".JPG"  &&
+            ext != ".jpeg" &&
+            ext != ".JPEG"
+        ) {
+            continue;
+        }
+
+        _images.emplace_back(path);
+    }
+
+    _currentImageIdx = 0;
+    CalcDstRectangle();
+
+    if (_images.empty()) {
+        logger::info("No image found!");
     }
 }
 
-void ImageViewport::CalcDstRectangle(const uint64_t width, const uint64_t height) {
+void ImageViewport::CalcDstRectangle() {
     if (_images.empty())
         return;
 
-    const float h = static_cast<float>(height);
-    const float w = static_cast<float>(width);
+    const float w = static_cast<float>(_windowWidth);
+    const float h = static_cast<float>(_windowHeight);
     const float winAspectRatio = w / h;
 
     if (GetCurrentImage().aspectRatio < winAspectRatio) {
@@ -139,7 +144,7 @@ void ImageViewport::CalcDstRectangle(const uint64_t width, const uint64_t height
     }
 }
 
-void ImageViewport::DeleteImage(const uint64_t width, const uint64_t height) {
+void ImageViewport::DeleteImage() {
     if (_images.empty())
         return;
 
@@ -167,11 +172,11 @@ void ImageViewport::DeleteImage(const uint64_t width, const uint64_t height) {
     } else {
         _currentImageIdx = 0;
     }
-    CalcDstRectangle(width, height);
+    CalcDstRectangle();
 }
 
-void ImageViewport::ResetCamera(const uint64_t width,const uint64_t height) {
-    _camera.offset = Vector2{ static_cast<float>(width) * 0.5f, static_cast<float>(height) * 0.5f };
+void ImageViewport::ResetCamera() {
+    _camera.offset = Vector2{ static_cast<float>(_windowWidth) * 0.5f, static_cast<float>(_windowHeight) * 0.5f };
     _camera.target = Vector2{ 0.0f, 0.0f };
     _camera.rotation = 0.0f;
     _camera.zoom = 1.0f;

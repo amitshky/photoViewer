@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
 
         viewport.Display();
 
+        // TODO: do this only in debug mode
         DrawFPS(10, 10);
         EndDrawing();
 
@@ -56,7 +57,7 @@ int main(int argc, char* argv[]) {
 
 
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
-    viewport.ProcessKeybindings(width, height);
+    viewport.ProcessKeybindings();
 
     if (IsKeyPressed(KEY_F)) { // "F" to toggle fullscreen
         ToggleFullscreen();
