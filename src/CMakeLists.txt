@@ -1,4 +1,6 @@
+file(GLOB_RECURSE SRC_FILES "*.cpp")
+
 add_executable(
     ${PROJECT_NAME}
-    main.cpp
+    "${SRC_FILES}"
 )

@@ -67,3 +67,6 @@ compile_commands.json
 
 # cmake system information
 information.txt
+
+# vim session
+session.vim
