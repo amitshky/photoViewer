@@ -14,7 +14,6 @@ ImageViewport::ImageViewport(const char* path,
       _camera{},
       _images{}
     {
-    const std::filesystem::directory_iterator dirItr{ path };
     FilePathList files = LoadDirectoryFiles(path);
     LoadFiles(files);
 
