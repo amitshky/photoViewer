@@ -23,7 +23,6 @@ public:
     void Resize(const uint64_t width, const uint64_t height);
     void LoadFiles(const FilePathList& files);
 
-
 private:
     inline ImageDetails GetCurrentImage() const { 
         return _images[_currentImageIdx]; 

@@ -119,7 +119,7 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
     CalcDstRectangle();
 
     if (_images.empty()) {
-        logger::info("No image found!");
+        logger::info("No images found!");
     }
 }
 
