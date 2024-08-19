@@ -3,7 +3,6 @@
 ImageDetails::ImageDetails(const char* path)
     : filepath{ path },
       directory{ GetDirectoryPath(path) },
-      fileExt{GetFileExtension(path)},
       filenameNoExt{ "" } {
     const Image imgData = LoadImage(path);
 

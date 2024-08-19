@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
     CloseWindow();
 }
 
+
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
     viewport.ProcessKeybindings(width, height);
 

@@ -10,33 +10,13 @@ ImageViewport::ImageViewport(const char* path,
     const std::string& rawFilePath)
     : _rawFilePath{rawFilePath},
       _currentImageIdx{ 0 },
-      _dstRectangle{ 0.0f,  0.0f, 0.0f, 0.0f  },
+      _dstRectangle{ 0.0f,  0.0f, 0.0f, 0.0f },
       _camera{},
       _images{}
     {
-    // TODO: use LoadFiles()
     const std::filesystem::directory_iterator dirItr{ path };
-    for (const auto& file : dirItr) {
-        if (std::filesystem::is_directory(file)) {
-            continue;
-        } else if (!std::filesystem::is_regular_file(file)) {
-            continue;
-        }
-        // check if the file is png/jpg or not
-        const char* path = file.path().c_str();
-        const std::string ext = GetFileExtension(path);
-        if (ext != ".png"  &&
-            ext != ".PNG"  &&
-            ext != ".jpg"  &&
-            ext != ".JPG"  &&
-            ext != ".jpeg" &&
-            ext != ".JPEG"
-        ) {
-            continue;
-        }
-
-        _images.emplace_back(path);
-    }
+    FilePathList files = LoadDirectoryFiles(path);
+    LoadFiles(files);
 
     if (_images.empty()) {
         logger::info("No images found in the current directory!");
@@ -47,18 +27,18 @@ ImageViewport::ImageViewport(const char* path,
 } 
 
 void ImageViewport::Display() {
+    if (_images.empty())
+        return;
+
     BeginMode2D(_camera);
 
-    if (_images.size() > 0) {
-        // TODO: do something when there are no images
-        DrawTexturePro(GetCurrentImage().texture,
-            GetCurrentImage().srcRectangle,
-            _dstRectangle, 
-            Vector2{ 0.0f, 0.0f },
-            0.0f,
-            WHITE
-        );
-    }
+    DrawTexturePro(GetCurrentImage().texture,
+        GetCurrentImage().srcRectangle,
+        _dstRectangle,
+        Vector2{ 0.0f, 0.0f },
+        0.0f,
+        WHITE
+    );
 
     EndMode2D();
 }
@@ -112,8 +92,27 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
         _images.reserve(files.count);
 
         for (uint64_t i = 0; i < files.count; ++i) {
-            // TODO: check if files are images
-            _images.push_back(ImageDetails{ files.paths[i] });
+            const char* path = files.paths[i];
+
+            if (std::filesystem::is_directory(path)) {
+                continue;
+            } else if (!std::filesystem::is_regular_file(path)) {
+                continue;
+            }
+
+            // check if the file is png/jpg or not
+            const std::string ext = GetFileExtension(path);
+            if (ext != ".png"  &&
+                ext != ".PNG"  &&
+                ext != ".jpg"  &&
+                ext != ".JPG"  &&
+                ext != ".jpeg" &&
+                ext != ".JPEG"
+            ) {
+                continue;
+            }
+
+            _images.emplace_back(path);
         }
 
         _currentImageIdx = 0;
