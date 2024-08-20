@@ -133,7 +133,7 @@ void ImageViewport::LoadFiles(const char* path) {
         _images.clear();
     }
 
-    std::filesystem::directory_iterator filesItr{ _config.imageDir };
+    std::filesystem::directory_iterator filesItr{ path };
     for (const auto& file : filesItr) {
         // check if the file is png/jpg or not
         if (utils::IsValidImage(file.path().c_str())) {
@@ -189,13 +189,13 @@ void ImageViewport::DeleteImage() {
     }
 
     // move the files to `.trash`
-    logger::log("moving: \"%s\" to \"%s\"", GetCurrentImage().filepath.c_str(), _config.trashDir);
+    logger::log("moving: \"%s\" to \"%s\"", GetCurrentImage().filepath.c_str(), _config.trashDir.c_str());
     std::filesystem::rename(GetCurrentImage().filepath, _config.trashDir + GetCurrentImage().filename);
     
     const std::string rawImageFileName = GetCurrentImage().filenameNoExt + _config.rawImageExt;
     const std::string rawImage = _config.rawImageDir + rawImageFileName;
     if (std::filesystem::exists(rawImage)) {
-        logger::log("moving: \"%s\" to \"%s\"", rawImage.c_str(), _config.trashDir);
+        logger::log("moving: \"%s\" to \"%s\"", rawImage.c_str(), _config.trashDir.c_str());
         std::filesystem::rename(rawImage, _config.trashDir + rawImageFileName);
     }
 
