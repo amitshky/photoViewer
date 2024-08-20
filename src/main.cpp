@@ -24,9 +24,10 @@ void OnFilesDropped(ImageViewport& viewport);
 
 int main(int argc, char* argv[]) {
     Config config{
-        .imagePath = "test/pic/",
-        .rawImagePath = "test/raw/",
-        .trashPath = "test/trash/",
+        .imageDir = "test/pic/",
+        .rawImageDir = "test/raw/",
+        .trashDir = "test/trash/",
+        .rawImageExt = ".ARW",
         .windowWidth = 1280,
         .windowHeight = 960,
     };
@@ -60,8 +61,7 @@ int main(int argc, char* argv[]) {
 
 
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
-    viewport.ProcessKeybindings();
-
+    // FIXME: pressing Q also triggers rotate (see viewport.ProcessKeybindings())
     // CTRL+Q to close the window
     if ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyPressed(KEY_Q)) {
         glfwSetWindowShouldClose(static_cast<GLFWwindow*>(GetWindowHandle()), GLFW_TRUE);
@@ -73,6 +73,8 @@ void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
         SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
         OnResize(viewport, width, height);
     }
+
+    viewport.ProcessKeybindings();
 }
 
 void OnResize(ImageViewport& viewport, uint64_t& width, uint64_t& height) {

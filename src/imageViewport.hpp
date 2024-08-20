@@ -19,6 +19,7 @@ public:
     void ProcessKeybindings();
     void Resize(const uint64_t width, const uint64_t height);
     void LoadFiles(const FilePathList& files);
+    void LoadFiles(const char* path);
 
 private:
     inline ImageDetails GetCurrentImage() const { 

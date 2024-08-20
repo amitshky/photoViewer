@@ -1,8 +1,9 @@
 #include "imageViewport.hpp"
 
 #include <filesystem>
-#include "logger.hpp"
 #include "raylib.h"
+#include "logger.hpp"
+#include "utils.hpp"
 
 ImageViewport::ImageViewport(const Config& config)
     : _config{ config },
@@ -11,8 +12,7 @@ ImageViewport::ImageViewport(const Config& config)
       _camera{},
       _images{}
     {
-    FilePathList files = LoadDirectoryFiles(_config.imagePath.c_str());
-    LoadFiles(files);
+    LoadFiles(_config.imageDir.c_str());
     ResetCamera();
 } 
 
@@ -45,15 +45,15 @@ void ImageViewport::ProcessKeybindings() {
     constexpr float rotationVal = 90.0f;
 
     // "scroll down" or "-" or "S" to zoom out
-    if ((scroll < 0.0f || IsKeyDown(KEY_MINUS) || IsKeyPressed(KEY_S)) && _camera.zoom > zoomVal) {
+    if ((scroll < 0.0f || IsKeyDown(KEY_MINUS) || IsKeyPressed(KEY_S) || IsKeyPressedRepeat(KEY_S)) && _camera.zoom > 0.5f) {
         _camera.zoom -= zoomVal;
     }
     // "scroll up" or "+" or "W" to zoom in
-    else if ((scroll > 0.0f || IsKeyDown(KEY_EQUAL) || IsKeyPressed(KEY_W)) && _camera.zoom <= 100.0f) {
+    else if ((scroll > 0.0f || IsKeyDown(KEY_EQUAL) || IsKeyPressed(KEY_W) || IsKeyPressedRepeat(KEY_W)) && _camera.zoom <= 100.0f) {
         _camera.zoom += zoomVal;
     }
-    // "0" to reset zoom
-    else if (IsKeyPressed(KEY_ZERO)) {
+    // "0" or "Z" to reset zoom
+    else if (IsKeyPressed(KEY_ZERO) || IsKeyPressed(KEY_Z)) {
         _camera.zoom = 1.0f;
     }
     // "]" or "E" to rotate clockwise
@@ -115,18 +115,41 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
         }
 
         // check if the file is png/jpg or not
-        const std::string ext = GetFileExtension(path);
-        if (ext != ".png"  &&
-            ext != ".PNG"  &&
-            ext != ".jpg"  &&
-            ext != ".JPG"  &&
-            ext != ".jpeg" &&
-            ext != ".JPEG"
-        ) {
+        if (utils::IsImage(path)) {
             continue;
         }
 
         _images.emplace_back(path);
+    }
+
+    _currentImageIdx = 0;
+    CalcDstRectangle();
+
+    if (_images.empty()) {
+        logger::info("No images found!");
+    }
+}
+
+void ImageViewport::LoadFiles(const char* path) {
+    CleanupImages();
+    if (!_images.empty()) {
+        _images.clear();
+    }
+
+    std::filesystem::directory_iterator filesItr{ _config.imageDir };
+    for (const auto& file : filesItr) {
+        if (std::filesystem::is_directory(file.path())) {
+            continue;
+        } else if (!std::filesystem::is_regular_file(file.path())) {
+            continue;
+        }
+
+        // check if the file is png/jpg or not
+        if (utils::IsImage(file.path().c_str())) {
+            continue;
+        }
+
+        _images.emplace_back(file.path().c_str());
     }
 
     _currentImageIdx = 0;
@@ -162,21 +185,19 @@ void ImageViewport::DeleteImage() {
     if (_images.empty())
         return;
 
-    // TODO: do not hardcode
-    const char* trash = "test/trash/";
-    if (!std::filesystem::exists(trash)) {
-        std::filesystem::create_directory(trash);
+    if (!std::filesystem::exists(_config.trashDir)) {
+        std::filesystem::create_directory(_config.trashDir);
     }
 
-    std::filesystem::path imagePath{ GetCurrentImage().filepath };
-    std::filesystem::path rawImagePath{ _config.rawImagePath + GetCurrentImage().filenameNoExt + ".ARW" };
-
     // move the files to `.trash`
-    std::filesystem::rename(imagePath, trash + GetCurrentImage().filename);
-    logger::log("deleting: \"%s\"", imagePath.c_str());
-    if (std::filesystem::exists(rawImagePath)) {
-        logger::log("deleting: \"%s\"", rawImagePath.c_str());
-        std::filesystem::rename(rawImagePath, trash + GetCurrentImage().filenameNoExt + ".ARW");
+    logger::log("deleting: \"%s\"", GetCurrentImage().filepath.c_str());
+    std::filesystem::rename(GetCurrentImage().filepath, _config.trashDir + GetCurrentImage().filename);
+    
+    const std::string rawImageFileName = GetCurrentImage().filenameNoExt + _config.rawImageExt;
+    const std::string rawImage = _config.rawImageDir + rawImageFileName;
+    if (std::filesystem::exists(rawImage)) {
+        logger::log("deleting: \"%s\"", rawImage.c_str());
+        std::filesystem::rename(rawImage, _config.trashDir + rawImageFileName);
     }
 
     // FIXME: after deleting, the next image's aspect ratio is not loading correctly
