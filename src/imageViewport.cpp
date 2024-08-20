@@ -72,7 +72,7 @@ void ImageViewport::ProcessKeybindings() {
         _camera.rotation -= rotationVal;
         _camera.rotation = static_cast<float>(static_cast<int32_t>(_camera.rotation) % 360);
     }
-    // "R" to reset camera
+    // "R" to reset image
     else if (IsKeyPressed(KEY_R)) {
         ResetCamera();
     }
@@ -111,15 +111,8 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
 
     for (uint64_t i = 0; i < files.count; ++i) {
         const char* path = files.paths[i];
-
-        if (std::filesystem::is_directory(path)) {
-            continue;
-        } else if (!std::filesystem::is_regular_file(path)) {
-            continue;
-        }
-
         // check if the file is png/jpg or not
-        if (utils::IsImage(path)) {
+        if (utils::IsValidImage(path)) {
             continue;
         }
 
@@ -142,14 +135,8 @@ void ImageViewport::LoadFiles(const char* path) {
 
     std::filesystem::directory_iterator filesItr{ _config.imageDir };
     for (const auto& file : filesItr) {
-        if (std::filesystem::is_directory(file.path())) {
-            continue;
-        } else if (!std::filesystem::is_regular_file(file.path())) {
-            continue;
-        }
-
         // check if the file is png/jpg or not
-        if (utils::IsImage(file.path().c_str())) {
+        if (utils::IsValidImage(file.path().c_str())) {
             continue;
         }
 
@@ -202,13 +189,13 @@ void ImageViewport::DeleteImage() {
     }
 
     // move the files to `.trash`
-    logger::log("deleting: \"%s\"", GetCurrentImage().filepath.c_str());
+    logger::log("moving: \"%s\" to \"%s\"", GetCurrentImage().filepath.c_str(), _config.trashDir);
     std::filesystem::rename(GetCurrentImage().filepath, _config.trashDir + GetCurrentImage().filename);
     
     const std::string rawImageFileName = GetCurrentImage().filenameNoExt + _config.rawImageExt;
     const std::string rawImage = _config.rawImageDir + rawImageFileName;
     if (std::filesystem::exists(rawImage)) {
-        logger::log("deleting: \"%s\"", rawImage.c_str());
+        logger::log("moving: \"%s\" to \"%s\"", rawImage.c_str(), _config.trashDir);
         std::filesystem::rename(rawImage, _config.trashDir + rawImageFileName);
     }
 

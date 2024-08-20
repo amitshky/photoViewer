@@ -1,17 +1,19 @@
 #include <cstring>
 #include <GLFW/glfw3.h>
-#include "raylib.h"
-#include "imageViewport.hpp"
 
-// TODO: pass arguments and make the app open even if no images are present
+#include "raylib.h"
+
+#include "imageViewport.hpp"
+#include "utils.hpp"
+
+
 // TODO: drag and drop folders
-// TODO: when drag and drop, change the root dir (image file path)
+// TODO: when drag and drop, change the root dir (image file path) and the trash, and raw image path
 // TODO: hot reloading
 // TODO: multithreading (load images in batches in the background and clear the images accordingly)
 // TODO: scroll zoom to mouse position
 // TODO: switch directory using TAB/SHIFT-TAB (i.e., load images from sibling directory)
-// TODO: make raw file extension, path configurable
-// TODO: config file
+// TODO: make raw file extension, path, etc configurable (config file)
 
 // FIXME: the image from camera are rotated; read file metadata
 // FIXME: the images take a long time to load (maybe load textures from memory only on image change)
@@ -31,6 +33,8 @@ int main(int argc, char* argv[]) {
         .windowWidth = 1280,
         .windowHeight = 960,
     };
+
+    utils::ParseArgs(argc, argv, config);
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(config.windowWidth, config.windowHeight, "Photo Viewer");
