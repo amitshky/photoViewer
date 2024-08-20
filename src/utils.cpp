@@ -8,10 +8,16 @@
 
 namespace utils {
 
+void InvalidArg() {
+    std::cerr << "Invalid arguments provided\n";
+    std::cerr << "Run \"photoViwer --help\"\n";
+    std::exit(-1);
+}
+
 // WARNING: this could break
 void ParseArgs(int argc, char* argv[], Config& config) {
     for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
+        if (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)) {
             std::cout << "Usage:\n";
             std::cout << "photoViewer [options] [path/value]\n\n";
             std::cout << "Options:\n";
@@ -21,22 +27,27 @@ void ParseArgs(int argc, char* argv[], Config& config) {
             std::cout << "-t <path>     Path to trash directory\n";
             std::cout << "-e <value>    Raw file extension (eg: \".ARW\")\n";
             std::exit(0);
-        } else if (strcmp(argv[i], "-i") == 0) {
-            // image path
-            config.imageDir = argv[++i];
-            continue;
-        } else if (strcmp(argv[i], "-r") == 0) {
-            // raw image path
-            config.rawImageDir = argv[++i];
-            continue;
-        } else if (strcmp(argv[i], "-t") == 0) {
-            // trash path
-            config.trashDir = argv[++i];
-            continue;
+        } else if (i + 1 < argc) {
+            // we need values following these options
+            if (strcmp(argv[i], "-i") == 0) {
+                // image path
+                config.imageDir = argv[++i];
+                continue;
+            } else if (strcmp(argv[i], "-r") == 0) {
+                // raw image path
+                config.rawImageDir = argv[++i];
+                continue;
+            } else if (strcmp(argv[i], "-t") == 0) {
+                // trash path
+                config.trashDir = argv[++i];
+                continue;
+            } else if (strcmp(argv[i], "-e") == 0) {
+                // raw image extension
+                config.rawImageExt = argv[++i];
+                continue;
+            }
         } else {
-            std::cerr << "Invalid arguments provided\n";
-            std::cerr << "Run \"photoViwer --help\"\n";
-            std::exit(-1);
+            InvalidArg();
         }
     }
 }
