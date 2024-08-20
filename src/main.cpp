@@ -5,8 +5,8 @@
 
 // TODO: pass arguments and make the app open even if no images are present
 // TODO: drag and drop folders
+// TODO: when drag and drop, change the root dir (image file path)
 // TODO: hot reloading
-// TODO: show the original size of the image when the size of the window is bigger than the image
 // TODO: multithreading (load images in batches in the background and clear the images accordingly)
 // TODO: scroll zoom to mouse position
 // TODO: switch directory using TAB/SHIFT-TAB (i.e., load images from sibling directory)

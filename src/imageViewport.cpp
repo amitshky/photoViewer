@@ -45,11 +45,15 @@ void ImageViewport::ProcessKeybindings() {
     constexpr float rotationVal = 90.0f;
 
     // "scroll down" or "-" or "S" to zoom out
-    if ((scroll < 0.0f || IsKeyDown(KEY_MINUS) || IsKeyPressed(KEY_S) || IsKeyPressedRepeat(KEY_S)) && _camera.zoom > 0.5f) {
+    if ((scroll < 0.0f || IsKeyDown(KEY_MINUS) || IsKeyPressed(KEY_S) || IsKeyPressedRepeat(KEY_S))
+        && _camera.zoom > 0.5f
+    ) {
         _camera.zoom -= zoomVal;
     }
     // "scroll up" or "+" or "W" to zoom in
-    else if ((scroll > 0.0f || IsKeyDown(KEY_EQUAL) || IsKeyPressed(KEY_W) || IsKeyPressedRepeat(KEY_W)) && _camera.zoom <= 100.0f) {
+    else if ((scroll > 0.0f || IsKeyDown(KEY_EQUAL) || IsKeyPressed(KEY_W) || IsKeyPressedRepeat(KEY_W))
+        && _camera.zoom <= 100.0f
+    ) {
         _camera.zoom += zoomVal;
     }
     // "0" or "Z" to reset zoom
@@ -164,16 +168,24 @@ void ImageViewport::CalcDstRectangle() {
     if (_images.empty())
         return;
 
-    const float w = static_cast<float>(_config.windowWidth);
-    const float h = static_cast<float>(_config.windowHeight);
+    float w = static_cast<float>(_config.windowWidth);
+    float h = static_cast<float>(_config.windowHeight);
     const float winAspectRatio = w / h;
 
     if (GetCurrentImage().aspectRatio < winAspectRatio) {
+        // keep the original size if the window is bigger than the image
+        if (GetCurrentImage().texture.height < _config.windowHeight) {
+            h = GetCurrentImage().texture.height;
+        }
         _dstRectangle.x      = -h * 0.5f * GetCurrentImage().aspectRatio;
         _dstRectangle.y      = -h * 0.5f;
         _dstRectangle.width  = h * GetCurrentImage().aspectRatio;
         _dstRectangle.height = h;
     } else {
+        // keep the original size if the window is bigger than the image
+        if (GetCurrentImage().texture.width < _config.windowWidth) {
+            w = GetCurrentImage().texture.width;
+        }
         _dstRectangle.x      = -w * 0.5f;
         _dstRectangle.y      = -w * 0.5f * 1.0f / GetCurrentImage().aspectRatio;
         _dstRectangle.width  = w;

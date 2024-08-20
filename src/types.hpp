@@ -22,7 +22,7 @@ public:
 
 public:
     std::string filepath;
-    std::string directory;
+    std::string directory; // TODO: this may not be needed, remove it
     std::string filename; // filename with extension
     std::string filenameNoExt; // filename without extension
     Texture2D texture;
