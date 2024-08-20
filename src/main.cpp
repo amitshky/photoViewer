@@ -1,5 +1,5 @@
-#include <string>
 #include <cstring>
+#include <GLFW/glfw3.h>
 #include "raylib.h"
 #include "imageViewport.hpp"
 
@@ -23,17 +23,20 @@ void OnFilesDropped(ImageViewport& viewport);
 
 
 int main(int argc, char* argv[]) {
-    uint64_t width = 640;
-    uint64_t height = 480;
-    const std::string path = "test/pic/";
-    const std::string rawFilePath = "test/raw/";
+    Config config{
+        .imagePath = "test/pic/",
+        .rawImagePath = "test/raw/",
+        .trashPath = "test/trash/",
+        .windowWidth = 1280,
+        .windowHeight = 960,
+    };
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(width, height, "Photo Viewer");
-    SetExitKey(KEY_Q); // "Q" to exit
+    InitWindow(config.windowWidth, config.windowHeight, "Photo Viewer");
+    SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
-    ImageViewport viewport{ path.c_str(), width, height, rawFilePath };
+    ImageViewport viewport{ config };
 
     while(!WindowShouldClose())
     {
@@ -46,8 +49,8 @@ int main(int argc, char* argv[]) {
         DrawFPS(10, 10);
         EndDrawing();
 
-        ProcessInput(viewport, width, height);
-        OnResize(viewport, width, height);
+        ProcessInput(viewport, config.windowWidth, config.windowHeight);
+        OnResize(viewport, config.windowWidth, config.windowHeight);
         OnFilesDropped(viewport);
     }
 
@@ -59,7 +62,12 @@ int main(int argc, char* argv[]) {
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
     viewport.ProcessKeybindings();
 
-    if (IsKeyPressed(KEY_F)) { // "F" to toggle fullscreen
+    // CTRL+Q to close the window
+    if ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyPressed(KEY_Q)) {
+        glfwSetWindowShouldClose(static_cast<GLFWwindow*>(GetWindowHandle()), GLFW_TRUE);
+    }
+    // "F" to toggle fullscreen
+    else if (IsKeyPressed(KEY_F)) {
         ToggleFullscreen();
         const int monitor = GetCurrentMonitor();
         SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));

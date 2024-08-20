@@ -1,8 +1,18 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include "raylib.h"
 
+
+struct Config {
+    std::string imagePath; // jpg/png directory path
+    std::string rawImagePath; // raw image directory path
+    std::string trashPath; // path to move images when deleted
+
+    uint64_t windowWidth;
+    uint64_t windowHeight;
+};
 
 struct ImageDetails {
 public:

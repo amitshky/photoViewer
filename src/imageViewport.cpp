@@ -4,19 +4,14 @@
 #include "logger.hpp"
 #include "raylib.h"
 
-ImageViewport::ImageViewport(const char* path,
-    const uint64_t width,
-    const uint64_t height,
-    const std::string& rawFilePath)
-    : _rawFilePath{ rawFilePath },
-      _windowWidth{ width },
-      _windowHeight{ height },
+ImageViewport::ImageViewport(const Config& config)
+    : _config{ config },
       _currentImageIdx{ 0 },
       _dstRectangle{ 0.0f,  0.0f, 0.0f, 0.0f },
       _camera{},
       _images{}
     {
-    FilePathList files = LoadDirectoryFiles(path);
+    FilePathList files = LoadDirectoryFiles(_config.imagePath.c_str());
     LoadFiles(files);
     ResetCamera();
 } 
@@ -46,37 +41,56 @@ void ImageViewport::CleanupImages() {
 
 void ImageViewport::ProcessKeybindings() {
     const float scroll = GetMouseWheelMove();
+    constexpr float zoomVal = 0.2f;
+    constexpr float rotationVal = 90.0f;
 
-    if ((scroll < 0.0f || IsKeyDown(KEY_MINUS)) && _camera.zoom > 0.5f) { // "scroll down" or "-" to zoom out
-        _camera.zoom -= 0.5f;
-    } else if ((scroll > 0.0f || IsKeyDown(KEY_EQUAL)) && _camera.zoom <= 100.0f) { // "scroll up" or "+" to zoom in
-        _camera.zoom += 0.5f;
-    } else if (IsKeyPressed(KEY_ZERO)) { // "0" to reset zoom
+    // "scroll down" or "-" or "S" to zoom out
+    if ((scroll < 0.0f || IsKeyDown(KEY_MINUS) || IsKeyPressed(KEY_S)) && _camera.zoom > zoomVal) {
+        _camera.zoom -= zoomVal;
+    }
+    // "scroll up" or "+" or "W" to zoom in
+    else if ((scroll > 0.0f || IsKeyDown(KEY_EQUAL) || IsKeyPressed(KEY_W)) && _camera.zoom <= 100.0f) {
+        _camera.zoom += zoomVal;
+    }
+    // "0" to reset zoom
+    else if (IsKeyPressed(KEY_ZERO)) {
         _camera.zoom = 1.0f;
-    } else if (IsKeyPressed(KEY_RIGHT_BRACKET)) { // "]" to rotate clockwise
+    }
+    // "]" or "E" to rotate clockwise
+    else if (IsKeyPressed(KEY_RIGHT_BRACKET) || IsKeyPressed(KEY_E)) {
         // TODO: rotate the image not the camera
         // TODO: fit to window after rotating
-        _camera.rotation += 90.0f;
+        _camera.rotation += rotationVal;
         _camera.rotation = static_cast<float>(static_cast<int32_t>(_camera.rotation) % 360);
-    } else if (IsKeyPressed(KEY_LEFT_BRACKET)) { // "[" to rotate counter clockwise
-        _camera.rotation -= 90.0f;
+    }
+    // "[" or "Q" to rotate counter clockwise
+    else if (IsKeyPressed(KEY_LEFT_BRACKET) || IsKeyPressed(KEY_Q)) {
+        _camera.rotation -= rotationVal;
         _camera.rotation = static_cast<float>(static_cast<int32_t>(_camera.rotation) % 360);
-    } else if (IsKeyPressed(KEY_R)) { // "R" to reset camera
+    }
+    // "R" to reset camera
+    else if (IsKeyPressed(KEY_R)) {
         ResetCamera();
-    } else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && _currentImageIdx + 1 < _images.size()) { // "D" or "Right arrow" to view next image
+    }
+    // "D" or "Right arrow" to view next image
+    else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && _currentImageIdx + 1 < _images.size()) {
         ++_currentImageIdx;
         CalcDstRectangle();
-    } else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && _currentImageIdx - 1 >= 0) { // "A" or "Left arrow" to view previous image
+    }
+    // "A" or "Left arrow" to view previous image
+    else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && _currentImageIdx - 1 >= 0) {
         --_currentImageIdx;
         CalcDstRectangle();
-    } else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) { // "Delete" or "X" to delete image as well as raw image (if exists)
+    }
+    // "Delete" or "X" to delete image as well as raw image (if exists)
+    else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {
         DeleteImage();
     }
 }
 
 void ImageViewport::Resize(const uint64_t width, const uint64_t height) {
-    _windowWidth = width;
-    _windowHeight = height;
+    _config.windowWidth = width;
+    _config.windowHeight = height;
     _camera.offset = Vector2{ static_cast<float>(width) * 0.5f, static_cast<float>(height) * 0.5f };
     CalcDstRectangle();
 }
@@ -127,8 +141,8 @@ void ImageViewport::CalcDstRectangle() {
     if (_images.empty())
         return;
 
-    const float w = static_cast<float>(_windowWidth);
-    const float h = static_cast<float>(_windowHeight);
+    const float w = static_cast<float>(_config.windowWidth);
+    const float h = static_cast<float>(_config.windowHeight);
     const float winAspectRatio = w / h;
 
     if (GetCurrentImage().aspectRatio < winAspectRatio) {
@@ -155,7 +169,7 @@ void ImageViewport::DeleteImage() {
     }
 
     std::filesystem::path imagePath{ GetCurrentImage().filepath };
-    std::filesystem::path rawImagePath{ _rawFilePath + GetCurrentImage().filenameNoExt + ".ARW" };
+    std::filesystem::path rawImagePath{ _config.rawImagePath + GetCurrentImage().filenameNoExt + ".ARW" };
 
     // move the files to `.trash`
     std::filesystem::rename(imagePath, trash + GetCurrentImage().filename);
@@ -176,7 +190,10 @@ void ImageViewport::DeleteImage() {
 }
 
 void ImageViewport::ResetCamera() {
-    _camera.offset = Vector2{ static_cast<float>(_windowWidth) * 0.5f, static_cast<float>(_windowHeight) * 0.5f };
+    _camera.offset = Vector2{
+        .x = static_cast<float>(_config.windowWidth) * 0.5f,
+        .y = static_cast<float>(_config.windowHeight) * 0.5f 
+    };
     _camera.target = Vector2{ 0.0f, 0.0f };
     _camera.rotation = 0.0f;
     _camera.zoom = 1.0f;

@@ -7,10 +7,7 @@
 
 class ImageViewport {
 public:
-    ImageViewport(const char* path,
-        const uint64_t width, // window width
-        const uint64_t height, // window height
-        const std::string& rawFilePath);
+    ImageViewport(const Config& config);
 
     ImageViewport(const ImageViewport&) = delete;
     ImageViewport(ImageViewport&&) = delete;
@@ -32,9 +29,7 @@ private:
     void ResetCamera();
 
 private:
-    std::string _rawFilePath;
-    uint64_t _windowWidth;
-    uint64_t _windowHeight;
+    Config _config;
     int64_t _currentImageIdx;
     Rectangle _dstRectangle; // to fit the image to the window
     Camera2D _camera;
