@@ -8,12 +8,6 @@
 
 namespace utils {
 
-void InvalidArg() {
-    std::cerr << "Invalid arguments provided\n";
-    std::cerr << "Run \"photoViwer --help\"\n";
-    std::exit(-1);
-}
-
 // WARNING: this could break
 void ParseArgs(int argc, char* argv[], Config& config) {
     for (int i = 1; i < argc; ++i) {
@@ -21,13 +15,13 @@ void ParseArgs(int argc, char* argv[], Config& config) {
             std::cout << "Usage:\n";
             std::cout << "photoViewer [options] [path/value]\n\n";
             std::cout << "Options:\n";
-            std::cout << "[# NOTE: the path must end with '/' (eg: \"foo/bar/\")]\n";
+            std::cout << "[# NOTE: the paths must end with '/' (eg: \"foo/bar/\")]\n";
             std::cout << "-i <path>     Path to jpg/png images directory\n";
             std::cout << "-r <path>     Path to raw images directory\n";
             std::cout << "-t <path>     Path to trash directory\n";
             std::cout << "-e <value>    Raw file extension (eg: \".ARW\")\n";
             std::exit(0);
-        } else if (i + 1 < argc) {
+        } else if (i + 1 < argc && strcmp(argv[i + 1], "") != 0) {
             // we need values following these options
             if (strcmp(argv[i], "-i") == 0) {
                 // image path
@@ -47,7 +41,9 @@ void ParseArgs(int argc, char* argv[], Config& config) {
                 continue;
             }
         } else {
-            InvalidArg();
+            std::cerr << "Invalid arguments provided\n";
+            std::cerr << "Run \"photoViwer --help\"\n";
+            std::exit(-1);
         }
     }
 }

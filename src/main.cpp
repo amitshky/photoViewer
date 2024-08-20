@@ -7,8 +7,8 @@
 #include "utils.hpp"
 
 
-// TODO: drag and drop folders
 // TODO: when drag and drop, change the root dir (image file path) and the trash, and raw image path
+// TODO: drag and drop folders
 // TODO: hot reloading
 // TODO: multithreading (load images in batches in the background and clear the images accordingly)
 // TODO: scroll zoom to mouse position
