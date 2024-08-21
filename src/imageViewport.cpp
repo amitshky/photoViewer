@@ -217,7 +217,6 @@ void ImageViewport::DeleteImage() {
         std::filesystem::rename(rawImage, _config.trashDir + rawImageFileName);
     }
 
-    // FIXME: after deleting, the next image's aspect ratio is not loading correctly
     _images.erase(_images.begin() + _currentImageIdx);
     if (_currentImageIdx - 1 >= 0) {
         --_currentImageIdx;

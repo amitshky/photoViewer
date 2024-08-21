@@ -8,9 +8,9 @@
 			"program": "${workspaceFolder}/build/dbg/src/photoViewer",
 			"preLaunchTask": "BuildDebug",
 			"args": [
-				// "-i", "test/pic/",
-				// "-r", "test/raw/",
-				// "-t", "test/trash/",
+				"-i", "sandbox/",
+				// "-r", "sandbox/",
+				// "-t", "sandbox/trash/",
 			],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",

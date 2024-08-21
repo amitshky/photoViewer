@@ -14,7 +14,7 @@ void Config::SetImageDirs(const char* path) {
     const int64_t len = strlen(path);
     if (path[len - 1] == '/' )
         imageDir = path;
-    else 
+    else
         imageDir = std::string{ path } + '/';
 
     rawImageDir = imageDir;
@@ -25,19 +25,19 @@ void Config::SetImageDirs(const char* imgDir, const char* rawImgDir, const char*
     int64_t len = strlen(imgDir);
     if (imgDir[len - 1] == '/' )
         imageDir = imgDir;
-    else 
+    else
         imageDir = std::string{ imgDir } + '/';
 
     len = strlen(rawImgDir);
     if (rawImgDir[len - 1] == '/' )
         rawImageDir = rawImgDir;
-    else 
+    else
         rawImageDir = std::string{ rawImgDir } + '/';
 
     len = strlen(trDir);
     if (trDir[len - 1] == '/' )
         trashDir = trDir;
-    else 
+    else
         trashDir = std::string{ trDir } + '/';
 }
 
@@ -58,7 +58,6 @@ ImageDetails::ImageDetails(const char* path)
 
     UnloadImage(imgData);
 
-    // FIXME: this can break if the path contains dot in directory name
     filename = GetFileName(path);
     for (const auto& ch : filename) {
         if (ch == '.')
