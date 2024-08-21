@@ -6,7 +6,7 @@
 #include "raylib.h"
 
 
-struct Config {
+class Config {
 public:
     Config(const char* path,
         const char* rawExt = ".ARW",
@@ -15,22 +15,8 @@ public:
 
     // the raw image directory is set to be the same as image directory
     // and the trash folder is created in the image directory
-    inline void SetImageDirs(const char* path) {
-        const int len = strlen(path);
-        if (path[len - 1] == '/' )
-            imageDir = path;
-        else 
-            imageDir = std::string{ path } + '/';
-
-        rawImageDir = imageDir;
-        trashDir    = imageDir + "trash/";
-    }
-
-    inline void SetImageDirs(const char* imgDir, const char* rawImgDir, const char* trDir) {
-        imageDir    = imgDir;
-        rawImageDir = rawImgDir;
-        trashDir    = trDir;
-    }
+    void SetImageDirs(const char* path);
+    void SetImageDirs(const char* imgDir, const char* rawImgDir, const char* trDir);
 
 public:
     // WARNING: include "/" at the end of the directory name (eg: "test/pic/")
@@ -49,7 +35,6 @@ public:
 
 public:
     std::string filepath;
-    std::string directory; // TODO: this may not be needed, remove it
     std::string filename; // filename with extension
     std::string filenameNoExt; // filename without extension
     Texture2D texture;

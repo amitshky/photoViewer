@@ -7,8 +7,6 @@
 #include "utils.hpp"
 
 
-// TODO: open images using args
-// TODO: check if the paths have "/", add it if not
 // TODO: scroll zoom to mouse position
 // TODO: write a profiler
 // TODO: multithreading (load images in batches in the background and clear the images accordingly)
@@ -30,7 +28,7 @@ void OnFilesDropped(ImageViewport& viewport);
 
 
 int main(int argc, char* argv[]) {
-    Config config{ "sandbox/" };
+    Config config{ "" };
     utils::ParseArgs(argc, argv, config);
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
