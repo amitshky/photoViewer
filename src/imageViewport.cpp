@@ -12,7 +12,7 @@ ImageViewport::ImageViewport(const Config& config)
       _camera{},
       _images{} {
     if (std::filesystem::is_directory(_config.imageDir)) {
-        LoadPath(_config.imageDir.c_str());
+        LoadFiles(_config.imageDir.c_str());
     } else if (std::filesystem::is_regular_file(_config.imageDir)) {
         LoadFile(_config.imageDir.c_str());
     }
@@ -136,21 +136,20 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
     _currentImageIdx = 0;
     CalcDstRectangle();
     // change image directories
-    _config.SetImageDirs(GetCurrentImage().directory.c_str());
+    _config.SetImageDirs(files.paths[0]);
 
     if (_images.empty()) {
         logger::info("No images found!");
     }
 }
 
-void ImageViewport::LoadPath(const char* path) {
+void ImageViewport::LoadFiles(const char* path) {
     CleanupImages();
     if (!_images.empty()) {
         _images.clear();
     }
 
     std::filesystem::path filesPath{ path };
-    // std::filesystem::directory_iterator filesItr{ path };
     for (const auto& file : std::filesystem::directory_iterator{ filesPath }) {
         // check if the file is png/jpg or not
         if (!utils::IsValidImage(file.path().c_str())) {
@@ -162,6 +161,8 @@ void ImageViewport::LoadPath(const char* path) {
 
     _currentImageIdx = 0;
     CalcDstRectangle();
+    // change image directories
+    _config.SetImageDirs(path);
 
     if (_images.empty()) {
         logger::info("No images found!");
