@@ -14,7 +14,7 @@ ImageViewport::ImageViewport(const Config& config)
     {
     LoadFiles(_config.imageDir.c_str());
     ResetCamera();
-} 
+}
 
 void ImageViewport::Display() {
     if (_images.empty())
@@ -121,6 +121,8 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
 
     _currentImageIdx = 0;
     CalcDstRectangle();
+    // change image directories
+    _config.SetImageDirs(GetCurrentImage().directory.c_str());
 
     if (_images.empty()) {
         logger::info("No images found!");
@@ -191,7 +193,7 @@ void ImageViewport::DeleteImage() {
     // move the files to `.trash`
     logger::log("moving: \"%s\" to \"%s\"", GetCurrentImage().filepath.c_str(), _config.trashDir.c_str());
     std::filesystem::rename(GetCurrentImage().filepath, _config.trashDir + GetCurrentImage().filename);
-    
+
     const std::string rawImageFileName = GetCurrentImage().filenameNoExt + _config.rawImageExt;
     const std::string rawImage = _config.rawImageDir + rawImageFileName;
     if (std::filesystem::exists(rawImage)) {
@@ -212,7 +214,7 @@ void ImageViewport::DeleteImage() {
 void ImageViewport::ResetCamera() {
     _camera.offset = Vector2{
         .x = static_cast<float>(_config.windowWidth) * 0.5f,
-        .y = static_cast<float>(_config.windowHeight) * 0.5f 
+        .y = static_cast<float>(_config.windowHeight) * 0.5f
     };
     _camera.target = Vector2{ 0.0f, 0.0f };
     _camera.rotation = 0.0f;

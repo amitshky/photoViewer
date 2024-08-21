@@ -6,6 +6,21 @@
 
 
 struct Config {
+public:
+    Config(const char* path,
+        const char* rawExt = ".ARW",
+        const uint64_t wWidth = 1280,
+        const uint64_t wHeight = 960);
+
+    // the raw image directory is set to be the same as image directory
+    // and the trash folder is created in the image directory
+    inline void SetImageDirs(const char* path) {
+        imageDir    = path;
+        rawImageDir = imageDir;
+        trashDir    = imageDir + "trash/";
+    }
+
+public:
     // WARNING: include "/" at the end of the directory name (eg: "test/pic/")
     std::string imageDir; // jpg/png directory path
     std::string rawImageDir; // raw image directory path

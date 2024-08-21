@@ -7,11 +7,14 @@
 #include "utils.hpp"
 
 
-// TODO: when drag and drop, change the root dir (image file path) and the trash, and raw image path
-// TODO: drag and drop folders
-// TODO: hot reloading
-// TODO: multithreading (load images in batches in the background and clear the images accordingly)
+// TODO: write a profiler
+// TODO: check if the paths have "/", add it if not
 // TODO: scroll zoom to mouse position
+// TODO: multithreading (load images in batches in the background and clear the images accordingly)
+// TODO: hot reloading
+// TODO: drag and drop folders
+// TODO: CTRL+C to copy image and CTRL+SHIFT+C to copy path
+// TODO: drag the image to copy image to copy the image
 // TODO: switch directory using TAB/SHIFT-TAB (i.e., load images from sibling directory)
 // TODO: make raw file extension, path, etc configurable (config file)
 
@@ -25,15 +28,7 @@ void OnFilesDropped(ImageViewport& viewport);
 
 
 int main(int argc, char* argv[]) {
-    Config config{
-        .imageDir = "test/pic/",
-        .rawImageDir = "test/raw/",
-        .trashDir = "test/trash/",
-        .rawImageExt = ".ARW",
-        .windowWidth = 1280,
-        .windowHeight = 960,
-    };
-
+    Config config{ "sandbox/" };
     utils::ParseArgs(argc, argv, config);
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);

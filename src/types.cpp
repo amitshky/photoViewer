@@ -1,8 +1,18 @@
 #include "types.hpp"
 
+Config::Config(const char* path,
+    const char* rawExt,
+    const uint64_t wWidth,
+    const uint64_t wHeight)
+    : rawImageExt{ rawExt },
+      windowWidth{ wWidth },
+      windowHeight{ wHeight } {
+    SetImageDirs(path);
+}
+
 ImageDetails::ImageDetails(const char* path)
     : filepath{ path },
-      directory{ GetDirectoryPath(path) },
+      directory{ std::string{ GetDirectoryPath(path) } + '/' },
       filenameNoExt{ "" } {
     const Image imgData = LoadImage(path);
 
