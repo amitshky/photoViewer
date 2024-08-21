@@ -8,8 +8,8 @@
 			"program": "${workspaceFolder}/build/dbg/src/photoViewer",
 			"preLaunchTask": "BuildDebug",
 			"args": [
-				// "-r", "test/raw/",
 				// "-i", "test/pic/",
+				// "-r", "test/raw/",
 				// "-t", "test/trash/",
 			],
 			"stopAtEntry": false,

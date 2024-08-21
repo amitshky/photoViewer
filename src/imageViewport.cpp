@@ -10,9 +10,13 @@ ImageViewport::ImageViewport(const Config& config)
       _currentImageIdx{ 0 },
       _dstRectangle{ 0.0f,  0.0f, 0.0f, 0.0f },
       _camera{},
-      _images{}
-    {
-    LoadFiles(_config.imageDir.c_str());
+      _images{} {
+    if (std::filesystem::is_directory(_config.imageDir)) {
+        LoadPath(_config.imageDir.c_str());
+    } else if (std::filesystem::is_regular_file(_config.imageDir)) {
+        LoadFile(_config.imageDir.c_str());
+    }
+
     ResetCamera();
 }
 
@@ -99,6 +103,16 @@ void ImageViewport::Resize(const uint64_t width, const uint64_t height) {
     CalcDstRectangle();
 }
 
+void ImageViewport::LoadFile(const char* filePath) {
+    char* path = const_cast<char*>(filePath);
+    FilePathList list{
+        .capacity = 1,
+        .count = 1,
+        .paths = &path,
+    };
+    LoadFiles(list);
+}
+
 void ImageViewport::LoadFiles(const FilePathList& files) {
     if (files.count <= 0)
         return;
@@ -112,7 +126,7 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
     for (uint64_t i = 0; i < files.count; ++i) {
         const char* path = files.paths[i];
         // check if the file is png/jpg or not
-        if (utils::IsValidImage(path)) {
+        if (!utils::IsValidImage(path)) {
             continue;
         }
 
@@ -129,16 +143,17 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
     }
 }
 
-void ImageViewport::LoadFiles(const char* path) {
+void ImageViewport::LoadPath(const char* path) {
     CleanupImages();
     if (!_images.empty()) {
         _images.clear();
     }
 
-    std::filesystem::directory_iterator filesItr{ path };
-    for (const auto& file : filesItr) {
+    std::filesystem::path filesPath{ path };
+    // std::filesystem::directory_iterator filesItr{ path };
+    for (const auto& file : std::filesystem::directory_iterator{ filesPath }) {
         // check if the file is png/jpg or not
-        if (utils::IsValidImage(file.path().c_str())) {
+        if (!utils::IsValidImage(file.path().c_str())) {
             continue;
         }
 

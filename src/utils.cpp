@@ -49,15 +49,19 @@ void ParseArgs(int argc, char* argv[], Config& config) {
 }
 
 bool IsValidImage(const char* filePath) {
-    const std::string ext = GetFileExtension(filePath);
-    if (std::filesystem::is_directory(filePath)) {
+    if (!std::filesystem::exists(filePath)) {
         return false;
-    } else if (ext != ".png"  &&
-        ext != ".PNG"  &&
-        ext != ".jpg"  &&
-        ext != ".JPG"  &&
-        ext != ".jpeg" &&
-        ext != ".JPEG"
+    } else if (std::filesystem::is_directory(filePath)) {
+        return false;
+    }
+
+    const std::string ext = GetFileExtension(filePath);
+    if (ext == ".png"  ||
+        ext == ".PNG"  ||
+        ext == ".jpg"  ||
+        ext == ".JPG"  ||
+        ext == ".jpeg" ||
+        ext == ".JPEG"
     ) {
         return true;
     }

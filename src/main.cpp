@@ -7,9 +7,10 @@
 #include "utils.hpp"
 
 
-// TODO: write a profiler
+// TODO: open images using args
 // TODO: check if the paths have "/", add it if not
 // TODO: scroll zoom to mouse position
+// TODO: write a profiler
 // TODO: multithreading (load images in batches in the background and clear the images accordingly)
 // TODO: hot reloading
 // TODO: drag and drop folders
@@ -18,6 +19,7 @@
 // TODO: switch directory using TAB/SHIFT-TAB (i.e., load images from sibling directory)
 // TODO: make raw file extension, path, etc configurable (config file)
 
+// FIXME: the path cannot be "."
 // FIXME: the image from camera are rotated; read file metadata
 // FIXME: the images take a long time to load (maybe load textures from memory only on image change)
 

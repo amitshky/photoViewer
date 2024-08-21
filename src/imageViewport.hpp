@@ -18,8 +18,22 @@ public:
     void CleanupImages();
     void ProcessKeybindings();
     void Resize(const uint64_t width, const uint64_t height);
+
+    /**
+      * Loads images using the path of the image
+      * @param `filePath` - file path
+      */
+    void LoadFile(const char* filePath);
+    /**
+      * Loads images from path list (for dropped files)
+      * @param `files` - list of paths
+      */
     void LoadFiles(const FilePathList& files);
-    void LoadFiles(const char* path);
+    /**
+      * Loads images using directory path
+      * @param `path` - path of the directory the images are in
+      */
+    void LoadPath(const char* path);
 
 private:
     inline ImageDetails GetCurrentImage() const { 
