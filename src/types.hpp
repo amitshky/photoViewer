@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
 #include <string>
 #include "raylib.h"
 
@@ -15,9 +16,20 @@ public:
     // the raw image directory is set to be the same as image directory
     // and the trash folder is created in the image directory
     inline void SetImageDirs(const char* path) {
-        imageDir    = path;
+        const int len = strlen(path);
+        if (path[len - 1] == '/' )
+            imageDir = path;
+        else 
+            imageDir = std::string{ path } + '/';
+
         rawImageDir = imageDir;
         trashDir    = imageDir + "trash/";
+    }
+
+    inline void SetImageDirs(const char* imgDir, const char* rawImgDir, const char* trDir) {
+        imageDir    = imgDir;
+        rawImageDir = rawImgDir;
+        trashDir    = trDir;
     }
 
 public:

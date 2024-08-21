@@ -136,7 +136,7 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
     _currentImageIdx = 0;
     CalcDstRectangle();
     // change image directories
-    _config.SetImageDirs(files.paths[0]);
+    _config.SetImageDirs(GetDirectoryPath(files.paths[0]));
 
     if (_images.empty()) {
         logger::info("No images found!");
