@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include "raylib.h"
+#include "raymath.h"
 #include "logger.hpp"
 #include "utils.hpp"
 
@@ -33,6 +34,12 @@ void ImageViewport::Display() {
         0.0f,
         WHITE
     );
+
+    Vector2 pos = GetScreenToWorld2D(GetMousePosition(), _camera);
+    DrawCircleV(_camera.target, 20.0f, RED);
+    DrawCircleV(_camera.offset, 20.0f, GREEN);
+    DrawCircleV(pos, 20.0f, BLUE);
+    // calc direction and move the camera to that direction
 
     EndMode2D();
 }
@@ -93,6 +100,13 @@ void ImageViewport::ProcessKeybindings() {
     // "Delete" or "X" to delete image as well as raw image (if exists)
     else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {
         DeleteImage();
+    }
+
+    // move camera
+    const Vector2 delta = GetMouseDelta();
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        _camera.target.x -= delta.x / _camera.zoom;
+        _camera.target.y -= delta.y / _camera.zoom;
     }
 }
 
