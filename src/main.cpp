@@ -1,10 +1,12 @@
 #include <cstring>
-#include <GLFW/glfw3.h>
+#include <iostream>
 
+#include <GLFW/glfw3.h>
 #include "raylib.h"
 
 #include "imageViewport.hpp"
 #include "utils.hpp"
+#include "timer.hpp"
 
 
 // TODO: write a profiler

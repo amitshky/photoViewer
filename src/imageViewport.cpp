@@ -2,9 +2,9 @@
 
 #include <filesystem>
 #include "raylib.h"
-#include "raymath.h"
 #include "logger.hpp"
 #include "utils.hpp"
+#include "timer.hpp"
 
 ImageViewport::ImageViewport(const Config& config)
     : _config{ config },
@@ -122,6 +122,7 @@ void ImageViewport::LoadFile(const char* filePath) {
 }
 
 void ImageViewport::LoadFiles(const FilePathList& files) {
+    Timer t{ "LoadFiles(const FilePathList& files)" };
     if (files.count <= 0)
         return;
 
@@ -152,6 +153,7 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
 }
 
 void ImageViewport::LoadFiles(const char* path) {
+    Timer t{ "LoadFiles(const char* path)" };
     CleanupImages();
     if (!_images.empty()) {
         _images.clear();
