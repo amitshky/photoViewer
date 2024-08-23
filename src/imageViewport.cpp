@@ -35,12 +35,6 @@ void ImageViewport::Display() {
         WHITE
     );
 
-    Vector2 pos = GetScreenToWorld2D(GetMousePosition(), _camera);
-    DrawCircleV(_camera.target, 20.0f, RED);
-    DrawCircleV(_camera.offset, 20.0f, GREEN);
-    DrawCircleV(pos, 20.0f, BLUE);
-    // calc direction and move the camera to that direction
-
     EndMode2D();
 }
 

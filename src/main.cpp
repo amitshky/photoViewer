@@ -7,7 +7,6 @@
 #include "utils.hpp"
 
 
-// TODO: scroll zoom to mouse position
 // TODO: write a profiler
 // TODO: multithreading (load images in batches in the background and clear the images accordingly)
 // TODO: hot reloading
@@ -44,8 +43,9 @@ int main(int argc, char* argv[]) {
 
         viewport.Display();
 
-        // TODO: do this only in debug mode
+#ifdef _DEBUG
         DrawFPS(10, 10);
+#endif
         EndDrawing();
 
         ProcessInput(viewport, config.windowWidth, config.windowHeight);

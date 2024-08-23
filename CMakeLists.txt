@@ -14,6 +14,10 @@ endif()
 add_subdirectory(src)
 add_subdirectory(ext)
 
+if(CMAKE_BUILD_TYPE STRLESS_EQUAL "Debug")
+    target_compile_definitions(${PROJECT_NAME} PUBLIC "_DEBUG")
+endif()
+
 target_include_directories(
     ${PROJECT_NAME}
     PUBLIC
