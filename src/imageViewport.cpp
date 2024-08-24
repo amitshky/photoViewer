@@ -11,7 +11,8 @@ ImageViewport::ImageViewport(const Config& config)
       _currentImageIdx{ 0 },
       _dstRectangle{ 0.0f,  0.0f, 0.0f, 0.0f },
       _camera{},
-      _images{} {
+      _images{},
+      _imageRotation{ 0 } {
     if (std::filesystem::is_directory(_config.imageDir)) {
         LoadFiles(_config.imageDir.c_str());
     } else if (std::filesystem::is_regular_file(_config.imageDir)) {
@@ -27,11 +28,12 @@ void ImageViewport::Display() {
 
     BeginMode2D(_camera);
 
+    Vector2 origin{ _dstRectangle.width / 2.0f, _dstRectangle.height / 2.0f };
     DrawTexturePro(GetCurrentImage().texture,
         GetCurrentImage().srcRectangle,
         _dstRectangle,
-        Vector2{ 0.0f, 0.0f },
-        0.0f,
+        origin,
+        static_cast<float>(_imageRotation),
         WHITE
     );
 
@@ -47,7 +49,7 @@ void ImageViewport::CleanupImages() {
 void ImageViewport::ProcessKeybindings() {
     const float scroll = GetMouseWheelMove();
     constexpr float zoomVal = 0.2f;
-    constexpr float rotationVal = 90.0f;
+    constexpr int32_t rotationVal = 90;
 
     // "scroll down" or "-" or "S" to zoom out
     if ((scroll < 0.0f || IsKeyDown(KEY_MINUS) || IsKeyPressed(KEY_S) || IsKeyPressedRepeat(KEY_S))
@@ -67,15 +69,11 @@ void ImageViewport::ProcessKeybindings() {
     }
     // "]" or "E" to rotate clockwise
     else if (IsKeyPressed(KEY_RIGHT_BRACKET) || IsKeyPressed(KEY_E)) {
-        // TODO: rotate the image not the camera
-        // TODO: fit to window after rotating
-        _camera.rotation += rotationVal;
-        _camera.rotation = static_cast<float>(static_cast<int32_t>(_camera.rotation) % 360);
+        _imageRotation = (_imageRotation + rotationVal) % 360;
     }
     // "[" or "Q" to rotate counter clockwise
     else if (IsKeyPressed(KEY_LEFT_BRACKET) || IsKeyPressed(KEY_Q)) {
-        _camera.rotation -= rotationVal;
-        _camera.rotation = static_cast<float>(static_cast<int32_t>(_camera.rotation) % 360);
+        _imageRotation = (_imageRotation - rotationVal) % 360;
     }
     // "R" to reset image
     else if (IsKeyPressed(KEY_R)) {
@@ -192,8 +190,6 @@ void ImageViewport::CalcDstRectangle() {
         if (GetCurrentImage().texture.height < _config.windowHeight) {
             h = GetCurrentImage().texture.height;
         }
-        _dstRectangle.x      = -h * 0.5f * GetCurrentImage().aspectRatio;
-        _dstRectangle.y      = -h * 0.5f;
         _dstRectangle.width  = h * GetCurrentImage().aspectRatio;
         _dstRectangle.height = h;
     } else {
@@ -201,8 +197,6 @@ void ImageViewport::CalcDstRectangle() {
         if (GetCurrentImage().texture.width < _config.windowWidth) {
             w = GetCurrentImage().texture.width;
         }
-        _dstRectangle.x      = -w * 0.5f;
-        _dstRectangle.y      = -w * 0.5f * 1.0f / GetCurrentImage().aspectRatio;
         _dstRectangle.width  = w;
         _dstRectangle.height = w * 1.0f / GetCurrentImage().aspectRatio;
     }

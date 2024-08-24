@@ -1,25 +1,26 @@
 #include <cstring>
-#include <iostream>
 
 #include <GLFW/glfw3.h>
 #include "raylib.h"
 
 #include "imageViewport.hpp"
 #include "utils.hpp"
-#include "timer.hpp"
 
 
-// TODO: write a profiler
-// TODO: multithreading (load images in batches in the background and clear the images accordingly)
+// TODO: multithreading 
+//       - load images in batches in the background and clear the images accordingly
 // TODO: hot reloading
 // TODO: drag and drop folders
 // TODO: CTRL+C to copy image and CTRL+SHIFT+C to copy path
 // TODO: drag the image to copy image to copy the image
 // TODO: switch directory using TAB/SHIFT-TAB (i.e., load images from sibling directory)
 // TODO: make raw file extension, path, etc configurable (config file)
+// TODO: display metadata in the viewport
+// TODO: fit image to window after rotating
 
 // FIXME: the image from camera are rotated; read file metadata (exif data)
-// FIXME: the images take a long time to load (maybe load textures from memory only on image change)
+// FIXME: the images take a long time to load 
+//        - (no improvement) maybe load textures from memory only on image change
 
 
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height);

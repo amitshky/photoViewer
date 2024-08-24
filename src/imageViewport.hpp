@@ -50,4 +50,5 @@ private:
     Rectangle _dstRectangle; // to fit the image to the window
     Camera2D _camera;
     std::vector<ImageDetails> _images;
+    int32_t _imageRotation;
 };
