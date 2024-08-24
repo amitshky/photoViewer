@@ -78,6 +78,7 @@ void ImageViewport::ProcessKeybindings() {
     // "R" to reset image
     else if (IsKeyPressed(KEY_R)) {
         ResetCamera();
+        _imageRotation = 0;
     }
     // "D" or "Right arrow" to view next image
     else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && _currentImageIdx + 1 < _images.size()) {
