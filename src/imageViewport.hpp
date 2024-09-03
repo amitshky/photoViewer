@@ -43,6 +43,8 @@ private:
     void CalcDstRectangle();
     void DeleteImage();
     void ResetCamera();
+    void LoadCurrentImage(const char* path);
+    void UnloadCurrentImage();
 
 private:
     Config _config;
@@ -51,4 +53,8 @@ private:
     Camera2D _camera;
     std::vector<ImageDetails> _images;
     int32_t _imageRotation;
+
+    Texture2D _texture{};
+    Rectangle _srcRectangle{ 0.0f, 0.0f, 0.0f, 0.0f };
+    float _aspectRatio = 0.0f;
 };

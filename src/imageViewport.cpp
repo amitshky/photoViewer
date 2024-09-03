@@ -29,8 +29,8 @@ void ImageViewport::Display() {
     BeginMode2D(_camera);
 
     Vector2 origin{ _dstRectangle.width / 2.0f, _dstRectangle.height / 2.0f };
-    DrawTexturePro(GetCurrentImage().texture,
-        GetCurrentImage().srcRectangle,
+    DrawTexturePro(_texture,
+        _srcRectangle,
         _dstRectangle,
         origin,
         static_cast<float>(_imageRotation),
@@ -41,9 +41,9 @@ void ImageViewport::Display() {
 }
 
 void ImageViewport::CleanupImages() {
-    for (const auto& img : _images) {
-        UnloadTexture(img.texture);
-    }
+    // for (const auto& img : _images) {
+    //     UnloadTexture(img.texture);
+    // }
 }
 
 void ImageViewport::ProcessKeybindings() {
@@ -83,12 +83,14 @@ void ImageViewport::ProcessKeybindings() {
     // "D" or "Right arrow" to view next image
     else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && _currentImageIdx + 1 < _images.size()) {
         ++_currentImageIdx;
-        CalcDstRectangle();
+        LoadCurrentImage(GetCurrentImage().filepath.c_str());
+        // CalcDstRectangle();
     }
     // "A" or "Left arrow" to view previous image
     else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && _currentImageIdx - 1 >= 0) {
         --_currentImageIdx;
-        CalcDstRectangle();
+        LoadCurrentImage(GetCurrentImage().filepath.c_str());
+        // CalcDstRectangle();
     }
     // "Delete" or "X" to delete image as well as raw image (if exists)
     else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {
@@ -148,6 +150,8 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
 
     if (_images.empty()) {
         logger::info("No images found!");
+    } else {
+        LoadCurrentImage(GetCurrentImage().filepath.c_str());
     }
 }
 
@@ -175,6 +179,8 @@ void ImageViewport::LoadFiles(const char* path) {
 
     if (_images.empty()) {
         logger::info("No images found!");
+    } else {
+        LoadCurrentImage(GetCurrentImage().filepath.c_str());
     }
 }
 
@@ -186,20 +192,20 @@ void ImageViewport::CalcDstRectangle() {
     float h = static_cast<float>(_config.windowHeight);
     const float winAspectRatio = w / h;
 
-    if (GetCurrentImage().aspectRatio < winAspectRatio) {
+    if (_aspectRatio < winAspectRatio) {
         // keep the original size if the window is bigger than the image
-        if (GetCurrentImage().texture.height < _config.windowHeight) {
-            h = GetCurrentImage().texture.height;
+        if (_texture.height < _config.windowHeight) {
+            h = _texture.height;
         }
-        _dstRectangle.width  = h * GetCurrentImage().aspectRatio;
+        _dstRectangle.width  = h * _aspectRatio;
         _dstRectangle.height = h;
     } else {
         // keep the original size if the window is bigger than the image
-        if (GetCurrentImage().texture.width < _config.windowWidth) {
-            w = GetCurrentImage().texture.width;
+        if (_texture.width < _config.windowWidth) {
+            w = _texture.width;
         }
         _dstRectangle.width  = w;
-        _dstRectangle.height = w * 1.0f / GetCurrentImage().aspectRatio;
+        _dstRectangle.height = w * 1.0f / _aspectRatio;
     }
 }
 
@@ -239,4 +245,23 @@ void ImageViewport::ResetCamera() {
     _camera.target = Vector2{ 0.0f, 0.0f };
     _camera.rotation = 0.0f;
     _camera.zoom = 1.0f;
+}
+
+void ImageViewport::LoadCurrentImage(const char* path) {
+    Timer t{ "LoadCurrentImage(const char* path)" };
+    const Image imgData = LoadImage(path);
+    _texture = LoadTextureFromImage(imgData);
+    _aspectRatio = static_cast<float>(imgData.width) / static_cast<float>(imgData.height);
+    _srcRectangle = {
+        .x = 0.0f,
+        .y = 0.0f,
+        .width = static_cast<float>(imgData.width),
+        .height = static_cast<float>(imgData.height),
+    };
+    UnloadImage(imgData);
+    CalcDstRectangle();
+}
+
+void ImageViewport::UnloadCurrentImage() {
+    UnloadTexture(_texture);
 }

@@ -23,9 +23,12 @@ target_include_directories(
     PUBLIC
     "src/"
     "./ext/raylib/src/"
+    "./ext/"
+    "./ext/tinyxml2/"
 )
 
 target_link_libraries(
     ${PROJECT_NAME}
     raylib
+    TinyEXIF
 )

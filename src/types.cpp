@@ -45,18 +45,16 @@ void Config::SetImageDirs(const char* imgDir, const char* rawImgDir, const char*
 ImageDetails::ImageDetails(const char* path)
     : filepath{ path },
       filenameNoExt{ "" } {
-    const Image imgData = LoadImage(path);
-
-    texture = LoadTextureFromImage(imgData);
-    aspectRatio = static_cast<float>(imgData.width) / static_cast<float>(imgData.height);
-    srcRectangle = {
-        .x = 0.0f,
-        .y = 0.0f,
-        .width = static_cast<float>(imgData.width),
-        .height = static_cast<float>(imgData.height),
-    };
-
-    UnloadImage(imgData);
+    // const Image imgData = LoadImage(path);
+    // texture = LoadTextureFromImage(imgData);
+    // aspectRatio = static_cast<float>(imgData.width) / static_cast<float>(imgData.height);
+    // srcRectangle = {
+    //     .x = 0.0f,
+    //     .y = 0.0f,
+    //     .width = static_cast<float>(imgData.width),
+    //     .height = static_cast<float>(imgData.height),
+    // };
+    // UnloadImage(imgData);
 
     filename = GetFileName(path);
     for (const auto& ch : filename) {

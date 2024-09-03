@@ -37,7 +37,7 @@ public:
     std::string filepath;
     std::string filename; // filename with extension
     std::string filenameNoExt; // filename without extension
-    Texture2D texture;
-    float aspectRatio;
-    Rectangle srcRectangle;
+    // Texture2D texture;
+    // float aspectRatio;
+    // Rectangle srcRectangle;
 };
