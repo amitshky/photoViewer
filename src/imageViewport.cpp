@@ -1,7 +1,12 @@
 #include "imageViewport.hpp"
 
 #include <filesystem>
+#include <fstream>
+#include <iostream>
+
+#include "raylib/src/external/stb_image.h"
 #include "raylib.h"
+#include "tinyexif/exif.h"
 #include "logger.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
@@ -44,6 +49,7 @@ void ImageViewport::CleanupImages() {
     // for (const auto& img : _images) {
     //     UnloadTexture(img.texture);
     // }
+    UnloadCurrentImage();
 }
 
 void ImageViewport::ProcessKeybindings() {
@@ -249,19 +255,111 @@ void ImageViewport::ResetCamera() {
 
 void ImageViewport::LoadCurrentImage(const char* path) {
     Timer t{ "LoadCurrentImage(const char* path)" };
-    const Image imgData = LoadImage(path);
-    _texture = LoadTextureFromImage(imgData);
-    _aspectRatio = static_cast<float>(imgData.width) / static_cast<float>(imgData.height);
+
+    std::ifstream stream{ path, std::ios::binary };
+    if (!stream.is_open()) {
+        logger::error("Error opening image: %s", path);
+    }
+
+    std::vector<unsigned char> buffer{ 
+        std::istreambuf_iterator<char>{ stream },
+        std::istreambuf_iterator<char>{}
+    };
+
+    int comp = 0;
+    Image image;
+    image.data = stbi_load_from_memory(buffer.data(), buffer.size(), &image.width, &image.height, &comp, 0);
+
+    if (image.data != NULL)
+    {
+        image.mipmaps = 1;
+
+        if (comp == 1) image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
+        else if (comp == 2) image.format = PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;
+        else if (comp == 3) image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+        else if (comp == 4) image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    }
+
+    tinyexif::EXIFInfo data;
+    int code = data.parseFrom(static_cast<const unsigned char*>(buffer.data()), buffer.size());
+
+    if (code == PARSE_EXIF_ERROR_NO_EXIF) {
+        logger::info("EXIF data not found!");
+    } else if (code == PARSE_EXIF_ERROR_NO_JPEG) {
+        logger::warn("Cannot parse EXIF data for non-JPEG images!");
+    } else if (code == PARSE_EXIF_ERROR_UNKNOWN_BYTEALIGN) {
+        logger::error("Error reading EXIF data (UNKNOWN BYTE ALIGNMENT)!");
+    } else if (code == PARSE_EXIF_ERROR_CORRUPT) {
+        logger::error("Error reading EXIF data (DATA CORRUPTED)!");
+    } else {
+        PrintEXIFData(data);
+    }
+
+    _texture = LoadTextureFromImage(image);
+    _aspectRatio = static_cast<float>(image.width) / static_cast<float>(image.height);
     _srcRectangle = {
         .x = 0.0f,
         .y = 0.0f,
-        .width = static_cast<float>(imgData.width),
-        .height = static_cast<float>(imgData.height),
+        .width = static_cast<float>(image.width),
+        .height = static_cast<float>(image.height),
     };
-    UnloadImage(imgData);
+
+    UnloadImage(image);
     CalcDstRectangle();
 }
 
 void ImageViewport::UnloadCurrentImage() {
     UnloadTexture(_texture);
+}
+
+void ImageViewport::PrintEXIFData(const tinyexif::EXIFInfo& data) {
+    logger::info("Exif data:");
+    logger::info("    Camera       : %s (%s)", data.Make.c_str(), data.Model.c_str());
+    logger::info("    Date-time    : %s", data.DateTime.c_str());
+    if (data.ExposureTime < 1.0) {
+        logger::info("    Shutter speed: 1/%ds", static_cast<int>(1.0f / data.ExposureTime));
+    } else {
+        logger::info("    Shutter speed: %.2fs", data.ExposureTime);
+    }
+    logger::info("    Aperture     : f%.1f", data.FNumber);
+    logger::info("    ISO          : %hu", data.ISOSpeedRatings);
+    logger::info("    Focal length : %dmm (%humm equivalent)", 
+        static_cast<int>(data.FocalLength), data.FocalLengthIn35mm);
+    logger::info("    Orientation  : %hu", data.Orientation);
+
+    // switch (info.orientation) {
+    // case 1:
+    //     break;
+    // case 2: // Flip X
+    //     t.scale(-1.0, 1.0);
+    //     t.translate(-info.width, 0);
+    //     break;
+    // case 3: // PI rotation 
+    //     t.translate(info.width, info.height);
+    //     t.rotate(Math.PI);
+    //     break;
+    // case 4: // Flip Y
+    //     t.scale(1.0, -1.0);
+    //     t.translate(0, -info.height);
+    //     break;
+    // case 5: // - PI/2 and Flip X
+    //     t.rotate(-Math.PI / 2);
+    //     t.scale(-1.0, 1.0);
+    //     break;
+    // case 6: // -PI/2 and -width
+    //     t.translate(info.height, 0);
+    //     t.rotate(Math.PI / 2);
+    //     break;
+    // case 7: // PI/2 and Flip
+    //     t.scale(-1.0, 1.0);
+    //     t.translate(-info.height, 0);
+    //     t.translate(0, info.width);
+    //     t.rotate(  3 * Math.PI / 2);
+    //     break;
+    // case 8: // PI / 2
+    //     t.translate(0, info.width);
+    //     t.rotate(  3 * Math.PI / 2);
+    //     break;
+    // }
+
 }

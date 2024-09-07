@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdint>
 #include "raylib.h"
+#include "tinyexif/exif.h"
 #include "types.hpp"
 
 class ImageViewport {
@@ -45,6 +46,7 @@ private:
     void ResetCamera();
     void LoadCurrentImage(const char* path);
     void UnloadCurrentImage();
+    static void PrintEXIFData(const tinyexif::EXIFInfo& data);
 
 private:
     Config _config;
