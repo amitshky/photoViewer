@@ -1,10 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <vector>
 
 #include <GLFW/glfw3.h>
 #include "raylib.h"
-#include "TinyEXIF/TinyEXIF.h"
+#include "tinyexif/exif.h"
 
 #include "imageViewport.hpp"
 #include "utils.hpp"
@@ -33,25 +34,60 @@
 
 
 int main(int argc, char* argv[]) {
+    // Read the JPEG file into a buffer
     std::ifstream stream{ "sandbox/DSC02031.JPG", std::ios::binary };
-    if (!stream) {
-        std::cerr << "Error\n";
+    std::vector<unsigned char> buffer{ std::istreambuf_iterator<char>{ stream }, std::istreambuf_iterator<char>{} };
+
+    tinyexif::EXIFInfo data;
+    int code = data.parseFrom(const_cast<const unsigned char*>(buffer.data()), buffer.size());
+    if (code) {
+        std::cerr << "Error reading EXIF data\n";
         return -1;
     }
 
-    TinyEXIF::EXIFInfo data{ stream };
-    if (!data.Fields) {
-        std::cerr << "Error\n";
-        return -1;
-    }
+    std::cout << "Exif data:\n";
+    std::cout << "    Camera       : " << data.Make << " (" << data.Model << ")\n";
+    std::cout << "    Date-time    : " << data.DateTime << '\n';
+    std::cout << "    Shutter speed: " << data.ExposureTime << "s\n";
+    std::cout << "    Aperture     : f" << data.FNumber << '\n';
+    std::cout << "    ISO          : " << data.ISOSpeedRatings << '\n';
+    std::cout << "    Focal length : " << data.FocalLength << "mm (" << data.FocalLengthIn35mm << "mm equivalent)\n";
+    std::cout << "    Orientation  : " << data.Orientation << '\n';
 
-    std::cout << "Exif data:\n"
-              << "    Camera: " << data.Make << " (" << data.Model << ")\n"
-              << "    Date-time: " << data.DateTime << '\n'
-              << "    Shutter speed: " << data.ExposureTime << "s\n"
-              << "    Aperture: f" << data.FNumber << '\n'
-              << "    ISO: " << data.ISOSpeedRatings << '\n'
-              << "    Focal length: " << data.FocalLength << "mm\n";
+    // switch (info.orientation) {
+    // case 1:
+    //     break;
+    // case 2: // Flip X
+    //     t.scale(-1.0, 1.0);
+    //     t.translate(-info.width, 0);
+    //     break;
+    // case 3: // PI rotation 
+    //     t.translate(info.width, info.height);
+    //     t.rotate(Math.PI);
+    //     break;
+    // case 4: // Flip Y
+    //     t.scale(1.0, -1.0);
+    //     t.translate(0, -info.height);
+    //     break;
+    // case 5: // - PI/2 and Flip X
+    //     t.rotate(-Math.PI / 2);
+    //     t.scale(-1.0, 1.0);
+    //     break;
+    // case 6: // -PI/2 and -width
+    //     t.translate(info.height, 0);
+    //     t.rotate(Math.PI / 2);
+    //     break;
+    // case 7: // PI/2 and Flip
+    //     t.scale(-1.0, 1.0);
+    //     t.translate(-info.height, 0);
+    //     t.translate(0, info.width);
+    //     t.rotate(  3 * Math.PI / 2);
+    //     break;
+    // case 8: // PI / 2
+    //     t.translate(0, info.width);
+    //     t.rotate(  3 * Math.PI / 2);
+    //     break;
+    // }
 
     return 0;
 //
