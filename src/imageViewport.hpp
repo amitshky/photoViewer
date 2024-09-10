@@ -38,7 +38,8 @@ public:
     void LoadFile(const char* filePath);
 
 private:
-    inline ImageDetails GetCurrentImage() const { 
+    // TODO: make this function const
+    inline ImageDetails& GetCurrentImage() { 
         return _images[_currentImageIdx]; 
     }
     void CalcDstRectangle();

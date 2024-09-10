@@ -1,5 +1,8 @@
 #include "types.hpp"
 
+#include "logger.hpp"
+#include "timer.hpp"
+
 Config::Config(const char* path,
     const char* rawExt,
     const uint64_t wWidth,
@@ -44,7 +47,9 @@ void Config::SetImageDirs(const char* imgDir, const char* rawImgDir, const char*
 
 ImageDetails::ImageDetails(const char* path)
     : filepath{ path },
-      filenameNoExt{ "" } {
+      filenameNoExt{ "" },
+      data{ nullptr }
+    {
     // const Image imgData = LoadImage(path);
     // texture = LoadTextureFromImage(imgData);
     // aspectRatio = static_cast<float>(imgData.width) / static_cast<float>(imgData.height);
@@ -56,6 +61,31 @@ ImageDetails::ImageDetails(const char* path)
     // };
     // UnloadImage(imgData);
 
+    FILE* file;
+    {
+        Timer tt{ "File Read" };
+
+        file = fopen(path, "rb");
+        if (file == nullptr) {
+            logger::error("Failed to load file: %s", path);
+            // TODO: handle failed to load
+            std::exit(-1);
+        }
+
+        fseek(file, 0, SEEK_END);
+        dataSize = ftell(file);
+        rewind(file);
+        data = new unsigned char[dataSize];
+        if (fread(data, sizeof(unsigned char), dataSize, file) != dataSize) {
+            logger::error("Failed to load file: %s", path);
+            delete[] data;
+            // TODO: handle failed to load
+            std::exit(-1);
+        }
+
+        fclose(file);
+    }
+
     filename = GetFileName(path);
     for (const auto& ch : filename) {
         if (ch == '.')
@@ -63,4 +93,47 @@ ImageDetails::ImageDetails(const char* path)
 
         filenameNoExt += ch;
     }
+}
+
+ImageDetails::~ImageDetails() {
+    delete[] data;
+    data = nullptr;
+    dataSize = 0;
+}
+
+ImageDetails::ImageDetails(const ImageDetails& other) {
+    filepath = other.filepath;
+    filename = other.filename;
+    filenameNoExt = other.filenameNoExt;
+    memcpy(data, other.data, other.dataSize);
+    dataSize = other.dataSize;
+}
+
+ImageDetails& ImageDetails::operator=(const ImageDetails& other) {
+    filepath = other.filepath;
+    filename = other.filename;
+    filenameNoExt = other.filenameNoExt;
+    memcpy(data, other.data, other.dataSize);
+    dataSize = other.dataSize;
+
+    return *this;
+}
+
+// TODO: implement proper move constructor and operator
+ImageDetails::ImageDetails(ImageDetails&& other) {
+    filepath = other.filepath;
+    filename = other.filename;
+    filenameNoExt = other.filenameNoExt;
+    memcpy(data, other.data, other.dataSize);
+    dataSize = other.dataSize;
+}
+
+ImageDetails& ImageDetails::operator=(ImageDetails&& other) {
+    filepath = other.filepath;
+    filename = other.filename;
+    filenameNoExt = other.filenameNoExt;
+    memcpy(data, other.data, other.dataSize);
+    dataSize = other.dataSize;
+
+    return *this;
 }

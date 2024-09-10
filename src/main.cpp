@@ -1,11 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <cstring>
-#include <vector>
-
 #include <GLFW/glfw3.h>
 #include "raylib.h"
-#include "tinyexif/exif.h"
 
 #include "imageViewport.hpp"
 #include "utils.hpp"

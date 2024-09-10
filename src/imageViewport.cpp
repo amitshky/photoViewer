@@ -2,14 +2,14 @@
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 
-#include "raylib/src/external/stb_image.h"
 #include "raylib.h"
-#include "tinyexif/exif.h"
+#include "raylib/src/external/stb_image.h"
+
 #include "logger.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
+
 
 ImageViewport::ImageViewport(const Config& config)
     : _config{ config },
@@ -256,19 +256,22 @@ void ImageViewport::ResetCamera() {
 void ImageViewport::LoadCurrentImage(const char* path) {
     Timer t{ "LoadCurrentImage(const char* path)" };
 
-    std::ifstream stream{ path, std::ios::binary };
-    if (!stream.is_open()) {
-        logger::error("Error opening image: %s", path);
-    }
-
-    std::vector<unsigned char> buffer{ 
-        std::istreambuf_iterator<char>{ stream },
-        std::istreambuf_iterator<char>{}
-    };
-
+    // TODO: check if loading images this way is fine
     int comp = 0;
     Image image;
-    image.data = stbi_load_from_memory(buffer.data(), buffer.size(), &image.width, &image.height, &comp, 0);
+
+    {
+        Timer tt{ "Image Loading" };
+        image.data =
+            stbi_load_from_memory(
+                GetCurrentImage().data,
+                GetCurrentImage().dataSize,
+                &image.width,
+                &image.height,
+                &comp,
+                0
+            );
+    }
 
     if (image.data != NULL)
     {
@@ -281,7 +284,10 @@ void ImageViewport::LoadCurrentImage(const char* path) {
     }
 
     tinyexif::EXIFInfo data;
-    int code = data.parseFrom(static_cast<const unsigned char*>(buffer.data()), buffer.size());
+    int code = data.parseFrom(
+        const_cast<const unsigned char*>(GetCurrentImage().data),
+        GetCurrentImage().dataSize
+    );
 
     if (code == PARSE_EXIF_ERROR_NO_EXIF) {
         logger::info("EXIF data not found!");

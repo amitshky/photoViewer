@@ -32,11 +32,20 @@ public:
 struct ImageDetails {
 public:
     ImageDetails(const char* path);
+    ~ImageDetails();
+
+    // TODO: implement
+    ImageDetails(const ImageDetails&);
+    ImageDetails& operator= (const ImageDetails&);
+    ImageDetails(ImageDetails&&);
+    ImageDetails& operator= (ImageDetails&&);
 
 public:
     std::string filepath;
     std::string filename; // filename with extension
     std::string filenameNoExt; // filename without extension
+    unsigned char* data;
+    uint64_t dataSize;
     // Texture2D texture;
     // float aspectRatio;
     // Rectangle srcRectangle;
