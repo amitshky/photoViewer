@@ -77,7 +77,7 @@ ImageDetails::ImageDetails(const char* path)
         rewind(file);
         data = new unsigned char[dataSize];
         if (fread(data, sizeof(unsigned char), dataSize, file) != dataSize) {
-            logger::error("Failed to load file: %s", path);
+            logger::error("Failed to read file: %s", path);
             delete[] data;
             // TODO: handle failed to load
             std::exit(-1);
@@ -105,6 +105,7 @@ ImageDetails::ImageDetails(const ImageDetails& other) {
     filepath = other.filepath;
     filename = other.filename;
     filenameNoExt = other.filenameNoExt;
+    data = new unsigned char[other.dataSize];
     memcpy(data, other.data, other.dataSize);
     dataSize = other.dataSize;
 }
@@ -113,6 +114,7 @@ ImageDetails& ImageDetails::operator=(const ImageDetails& other) {
     filepath = other.filepath;
     filename = other.filename;
     filenameNoExt = other.filenameNoExt;
+    data = new unsigned char[other.dataSize];
     memcpy(data, other.data, other.dataSize);
     dataSize = other.dataSize;
 
@@ -124,6 +126,7 @@ ImageDetails::ImageDetails(ImageDetails&& other) {
     filepath = other.filepath;
     filename = other.filename;
     filenameNoExt = other.filenameNoExt;
+    data = new unsigned char[other.dataSize];
     memcpy(data, other.data, other.dataSize);
     dataSize = other.dataSize;
 }
@@ -132,6 +135,7 @@ ImageDetails& ImageDetails::operator=(ImageDetails&& other) {
     filepath = other.filepath;
     filename = other.filename;
     filenameNoExt = other.filenameNoExt;
+    data = new unsigned char[other.dataSize];
     memcpy(data, other.data, other.dataSize);
     dataSize = other.dataSize;
 

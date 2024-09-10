@@ -1,7 +1,6 @@
 #include "imageViewport.hpp"
 
 #include <filesystem>
-#include <fstream>
 
 #include "raylib.h"
 #include "raylib/src/external/stb_image.h"
