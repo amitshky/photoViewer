@@ -99,6 +99,10 @@ ImageDetails::ImageDetails(const ImageDetails& other) {
 }
 
 ImageDetails& ImageDetails::operator=(const ImageDetails& other) {
+    if (&other == this) {
+        return *this;
+    }
+
     filepath = other.filepath;
     filename = other.filename;
     filenameNoExt = other.filenameNoExt;
@@ -109,23 +113,31 @@ ImageDetails& ImageDetails::operator=(const ImageDetails& other) {
     return *this;
 }
 
-// TODO: implement proper move constructor and operator
+// TODO: check if the implement is a proper move constructor and operator or not
 ImageDetails::ImageDetails(ImageDetails&& other) {
-    filepath = other.filepath;
-    filename = other.filename;
-    filenameNoExt = other.filenameNoExt;
-    data = new unsigned char[other.dataSize];
-    memcpy(data, other.data, other.dataSize);
+    filepath = std::move(other.filepath);
+    filename = std::move(other.filename);
+    filenameNoExt = std::move(other.filenameNoExt);
+    data = other.data;;
     dataSize = other.dataSize;
+
+    other.data = nullptr;
+    other.dataSize = 0;
 }
 
 ImageDetails& ImageDetails::operator=(ImageDetails&& other) {
-    filepath = other.filepath;
-    filename = other.filename;
-    filenameNoExt = other.filenameNoExt;
-    data = new unsigned char[other.dataSize];
-    memcpy(data, other.data, other.dataSize);
+    if (&other == this) {
+        return *this;
+    }
+
+    filepath = std::move(other.filepath);
+    filename = std::move(other.filename);
+    filenameNoExt = std::move(other.filenameNoExt);
+    data = other.data;;
     dataSize = other.dataSize;
+
+    other.data = nullptr;
+    other.dataSize = 0;
 
     return *this;
 }

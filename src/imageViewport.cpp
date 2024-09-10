@@ -132,9 +132,9 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
     CleanupImages();
     if (!_images.empty()) {
         _images.clear();
-        _images.reserve(files.count);
     }
 
+    _images.reserve(files.count);
     for (uint64_t i = 0; i < files.count; ++i) {
         const char* path = files.paths[i];
         // check if the file is png/jpg or not
@@ -165,6 +165,11 @@ void ImageViewport::LoadFiles(const char* path) {
     }
 
     std::filesystem::path filesPath{ path };
+    _images.reserve(std::distance(
+        std::filesystem::directory_iterator(filesPath),
+        std::filesystem::directory_iterator()
+    ));
+
     for (const auto& file : std::filesystem::directory_iterator{ filesPath }) {
         // check if the file is png/jpg or not
         if (!utils::IsValidImage(file.path().c_str())) {
