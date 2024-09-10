@@ -45,9 +45,6 @@ void ImageViewport::Display() {
 }
 
 void ImageViewport::CleanupImages() {
-    // for (const auto& img : _images) {
-    //     UnloadTexture(img.texture);
-    // }
     UnloadCurrentImage();
 }
 

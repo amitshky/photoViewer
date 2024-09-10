@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
-#include "raylib.h"
 
 
 class Config {
@@ -46,7 +45,4 @@ public:
     std::string filenameNoExt; // filename without extension
     unsigned char* data;
     uint64_t dataSize;
-    // Texture2D texture;
-    // float aspectRatio;
-    // Rectangle srcRectangle;
 };
