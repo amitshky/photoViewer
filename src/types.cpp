@@ -1,5 +1,6 @@
 #include "types.hpp"
 
+#include "cctype"
 #include "logger.hpp"
 #include "timer.hpp"
 
@@ -47,7 +48,9 @@ void Config::SetImageDirs(const char* imgDir, const char* rawImgDir, const char*
 
 ImageDetails::ImageDetails(const char* path)
     : filepath{ path },
+      filename{ "" },
       filenameNoExt{ "" },
+      extension{ "" },
       data{ nullptr } {
     FILE* file;
     {
@@ -74,7 +77,9 @@ ImageDetails::ImageDetails(const char* path)
         fclose(file);
     }
 
+
     filename = GetFileName(path);
+    extension = GetFileExtension(filename.c_str());
     for (const auto& ch : filename) {
         if (ch == '.')
             break;

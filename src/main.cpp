@@ -5,7 +5,9 @@
 #include "utils.hpp"
 
 
-// TODO: check if "imageLoading" branch has tinyexif in the remote
+// TODO: fix args parser
+// TODO: refactor this
+//       - application class, input processing
 // TODO: multithreading
 //       - load images in batches in the background and clear the images accordingly
 //       - store loaded images on a stack-like data structure tht will only store a
