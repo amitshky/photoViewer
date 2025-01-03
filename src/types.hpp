@@ -7,7 +7,7 @@
 
 class Config {
 public:
-    Config(const char* path,
+    explicit Config(const char* path = "./",
         const char* rawExt = ".ARW",
         const uint64_t wWidth = 1280,
         const uint64_t wHeight = 960);

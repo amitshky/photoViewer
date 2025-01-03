@@ -31,7 +31,7 @@ void OnFilesDropped(ImageViewport& viewport);
 
 
 int main(int argc, char* argv[]) {
-    Config config{ "" };
+    Config config{};
     utils::ParseArgs(argc, argv, config);
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);

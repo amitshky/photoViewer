@@ -8,7 +8,7 @@
 
 class ImageViewport {
 public:
-    ImageViewport(const Config& config);
+    explicit ImageViewport(const Config& config);
 
     ImageViewport(const ImageViewport&) = delete;
     ImageViewport(ImageViewport&&) = delete;
