@@ -12,6 +12,7 @@ namespace utils {
 // TODO: fix for passing "-i -r" or equivalent
 void ParseArgs(int argc, char* argv[], Config& config) {
     for (int i = 1; i < argc; ++i) {
+        // "--help" or "-h" arg
         if (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)) {
             std::cout << "Usage:\n";
             std::cout << "photoViewer [options] [path/value]\n\n";
@@ -26,7 +27,7 @@ void ParseArgs(int argc, char* argv[], Config& config) {
             // we need values following these options
             if (strcmp(argv[i], "-i") == 0) {
                 // image path
-                config.imageDir = argv[++i];
+                config.imagePath = argv[++i];
                 continue;
             } else if (strcmp(argv[i], "-r") == 0) {
                 // raw image path

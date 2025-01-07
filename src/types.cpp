@@ -17,20 +17,20 @@ Config::Config(const char* path,
 void Config::SetImageDirs(const char* path) {
     const int64_t len = strlen(path);
     if (path[len - 1] == '/' )
-        imageDir = path;
+        imagePath = path;
     else
-        imageDir = std::string{ path } + '/';
+        imagePath = std::string{ path } + '/';
 
-    rawImageDir = imageDir;
-    trashDir    = imageDir + "trash/";
+    rawImageDir = imagePath;
+    trashDir    = imagePath + "trash/";
 }
 
 void Config::SetImageDirs(const char* imgDir, const char* rawImgDir, const char* trDir) {
     int64_t len = strlen(imgDir);
     if (imgDir[len - 1] == '/' )
-        imageDir = imgDir;
+        imagePath = imgDir;
     else
-        imageDir = std::string{ imgDir } + '/';
+        imagePath = std::string{ imgDir } + '/';
 
     len = strlen(rawImgDir);
     if (rawImgDir[len - 1] == '/' )

@@ -18,7 +18,7 @@ public:
     void SetImageDirs(const char* imgDir, const char* rawImgDir, const char* trDir);
 
 public:
-    std::string imageDir; // jpg/png directory path
+    std::string imagePath; // jpg/png directory path or file path
     std::string rawImageDir; // raw image directory path
     std::string trashDir; // path to move images when deleted
     std::string rawImageExt; // extension of the raw image (eg: ".ARW")

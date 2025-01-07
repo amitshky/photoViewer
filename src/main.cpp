@@ -41,8 +41,7 @@ int main(int argc, char* argv[]) {
 
     ImageViewport viewport{ config };
 
-    while(!WindowShouldClose())
-    {
+    while(!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(GetColor(0x282828FF));
 

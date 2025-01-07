@@ -17,10 +17,10 @@ ImageViewport::ImageViewport(const Config& config)
       _camera{},
       _images{},
       _imageRotation{ 0 } {
-    if (std::filesystem::is_directory(_config.imageDir)) {
-        LoadFiles(_config.imageDir.c_str());
-    } else if (std::filesystem::is_regular_file(_config.imageDir)) {
-        LoadFile(_config.imageDir.c_str());
+    if (std::filesystem::is_directory(_config.imagePath)) {
+        LoadFiles(_config.imagePath.c_str());
+    } else if (std::filesystem::is_regular_file(_config.imagePath)) {
+        LoadFile(_config.imagePath.c_str());
     }
 
     ResetCamera();
@@ -32,8 +32,9 @@ void ImageViewport::Display() {
 
     BeginMode2D(_camera);
 
-    Vector2 origin{ _dstRectangle.width / 2.0f, _dstRectangle.height / 2.0f };
-    DrawTexturePro(_texture,
+    const Vector2 origin{ _dstRectangle.width / 2.0f, _dstRectangle.height / 2.0f };
+    DrawTexturePro(
+        _texture,
         _srcRectangle,
         _dstRectangle,
         origin,
@@ -86,13 +87,11 @@ void ImageViewport::ProcessKeybindings() {
     else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && _currentImageIdx + 1 < _images.size()) {
         ++_currentImageIdx;
         LoadCurrentImage(GetCurrentImage().filepath.c_str());
-        // CalcDstRectangle();
     }
     // "A" or "Left arrow" to view previous image
     else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && _currentImageIdx - 1 >= 0) {
         --_currentImageIdx;
         LoadCurrentImage(GetCurrentImage().filepath.c_str());
-        // CalcDstRectangle();
     }
     // "Delete" or "X" to delete image as well as raw image (if exists)
     else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {
