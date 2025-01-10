@@ -6,6 +6,7 @@
 #include "tinyexif/exif.h"
 #include "types.hpp"
 
+
 class ImageViewport {
 public:
     explicit ImageViewport(const Config& config);
@@ -38,8 +39,7 @@ public:
     void LoadFile(const char* filePath);
 
 private:
-    // TODO: make this function const
-    inline ImageDetails& GetCurrentImage() { 
+    inline const ImageDetails& GetCurrentImage() { 
         return _images[_currentImageIdx]; 
     }
     void CalcDstRectangle();

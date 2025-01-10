@@ -261,7 +261,7 @@ void ImageViewport::LoadCurrentImage(const char* path) {
     Image image;
 
     {
-        Timer tt{ "Image Loading" };
+        Timer tt{ "Loading image from memory" };
         image.data = stbi_load_from_memory(
             GetCurrentImage().data,
             GetCurrentImage().dataSize,

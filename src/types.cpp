@@ -77,7 +77,6 @@ ImageDetails::ImageDetails(const char* path)
         fclose(file);
     }
 
-
     filename = GetFileName(path);
     extension = GetFileExtension(filename.c_str());
     for (const auto& ch : filename) {
@@ -118,7 +117,7 @@ ImageDetails& ImageDetails::operator=(const ImageDetails& other) {
     return *this;
 }
 
-// TODO: check if the implement is a proper move constructor and operator or not
+// TODO: check if these implementations is a proper move constructor and operator or not
 ImageDetails::ImageDetails(ImageDetails&& other) {
     filepath = std::move(other.filepath);
     filename = std::move(other.filename);
