@@ -5,24 +5,25 @@
 #include "utils.hpp"
 
 
-// TODO: fix args parser
+// TODO: a way to input image directories
+// TODO: display metadata in the viewport
+// TODO: check orientation from EXIF data and rotate accordingly
+// TODO: fit image to window after rotating
+
 // TODO: refactor this
 //       - application class, input processing
 // TODO: multithreading
-//       - load images in batches in the background and clear the images accordingly
-//       - store loaded images on a stack-like data structure tht will only store a
-//         number of images, and when full will overwrite the older images (use indices)
+//       - load images in batches in the background and clear 
+//         the images accordingly
+//       - store loaded images in a stack-like data structure tht will only store
+//         a number of images, and when full will overwrite 
+//         the older images (use indices)
 // TODO: hot reloading
 // TODO: CTRL+C to copy image and CTRL+SHIFT+C to copy path
-// TODO: drag the image to copy image to copy the image
-// TODO: switch directory using TAB/SHIFT-TAB (i.e., load images from sibling directory)
-// TODO: make raw file extension, path, etc configurable (config file)
-// TODO: display metadata in the viewport
-// TODO: fit image to window after rotating
-
-// FIXME: the image from camera are rotated; read file metadata (exif data)
-// FIXME: the images take a long time to load
-//        - (no improvement) maybe load textures from memory only on image change
+// TODO: drag the image to copy the image
+// TODO: switch directory using TAB/SHIFT-TAB 
+//       (i.e., load images from sibling directory)
+// TODO: make raw file extension, path, etc configurable (from a config file)
 
 
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height);
@@ -95,6 +96,6 @@ void OnFilesDropped(ImageViewport& viewport) {
     }
 
     FilePathList files = LoadDroppedFiles();
-    viewport.LoadFiles(files);
+    viewport.LoadFilesFromList(files);
     UnloadDroppedFiles(files);
 }

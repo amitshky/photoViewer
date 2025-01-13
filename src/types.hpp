@@ -7,24 +7,29 @@
 
 class Config {
 public:
-    explicit Config(const char* path = "./",
-        const char* rawExt = ".ARW",
+    explicit Config(const char* path = "",
+        const char* rawExt = ".ARW", // default is sony's raw file extension
         const uint64_t wWidth = 1280,
         const uint64_t wHeight = 960);
 
-    // the raw image directory is set to be the same as image directory
-    // and the trash folder is created in the image directory
-    void SetImageDirs(const char* path);
-    void SetImageDirs(const char* imgDir, const char* rawImgDir, const char* trDir);
-
 public:
     std::string imagePath; // jpg/png directory path or file path
-    std::string rawImageDir; // raw image directory path
+    std::string rawImagePath; // raw image directory path
     std::string trashDir; // path to move images when deleted
     std::string rawImageExt; // extension of the raw image (eg: ".ARW")
 
     uint64_t windowWidth;
     uint64_t windowHeight;
+
+private:
+    /**
+     * Initializes the image directories (image path, raw image path, and trash
+     * directory path. The raw image directory is set same as the image directory
+     * and the trash directory is created in the image directory.
+     *
+     * @param `path` - path of the image or image directory
+     */
+    void InitImageDirs(const char* path);
 };
 
 

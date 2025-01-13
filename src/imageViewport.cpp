@@ -18,7 +18,7 @@ ImageViewport::ImageViewport(const Config& config)
       _images{},
       _imageRotation{ 0 } {
     if (std::filesystem::is_directory(_config.imagePath)) {
-        LoadFiles(_config.imagePath.c_str());
+        LoadFilesFromDir(_config.imagePath.c_str());
     } else if (std::filesystem::is_regular_file(_config.imagePath)) {
         LoadFile(_config.imagePath.c_str());
     }
@@ -120,10 +120,10 @@ void ImageViewport::LoadFile(const char* filePath) {
         .count = 1,
         .paths = &path,
     };
-    LoadFiles(list);
+    LoadFilesFromList(list);
 }
 
-void ImageViewport::LoadFiles(const FilePathList& files) {
+void ImageViewport::LoadFilesFromList(const FilePathList& files) {
     Timer t{ "LoadFiles(const FilePathList& files)" };
     if (files.count <= 0)
         return;
@@ -146,8 +146,11 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
 
     _currentImageIdx = 0;
     CalcDstRectangle();
-    // change image directories
-    _config.SetImageDirs(GetDirectoryPath(files.paths[0]));
+    // update image directory
+    // TODO: also update to the config in main.cpp
+    // or dont have copy the entire config object and let main.cpp handle config
+    // or dont update paths here
+    _config.imagePath = GetDirectoryPath(files.paths[0]);
 
     if (_images.empty()) {
         logger::info("No images found!");
@@ -156,32 +159,32 @@ void ImageViewport::LoadFiles(const FilePathList& files) {
     }
 }
 
-void ImageViewport::LoadFiles(const char* path) {
+void ImageViewport::LoadFilesFromDir(const char* path) {
     Timer t{ "LoadFiles(const char* path)" };
     CleanupImages();
     if (!_images.empty()) {
         _images.clear();
     }
 
-    std::filesystem::path filesPath{ path };
+    const std::filesystem::path filesPath{ path };
     _images.reserve(std::distance(
         std::filesystem::directory_iterator(filesPath),
         std::filesystem::directory_iterator()
     ));
 
     for (const auto& file : std::filesystem::directory_iterator{ filesPath }) {
+        // in windows path().c_str() gives wide char
+        const std::string fpath = file.path().string();
         // check if the file is png/jpg or not
-        if (!utils::IsValidImage(file.path().c_str())) {
+        if (!utils::IsValidImage(fpath.c_str())) {
             continue;
         }
 
-        _images.emplace_back(file.path().c_str());
+        _images.emplace_back(fpath.c_str());
     }
 
     _currentImageIdx = 0;
     CalcDstRectangle();
-    // change image directories
-    _config.SetImageDirs(path);
 
     if (_images.empty()) {
         logger::info("No images found!");
@@ -216,6 +219,7 @@ void ImageViewport::CalcDstRectangle() {
 }
 
 void ImageViewport::DeleteImage() {
+    // TODO: switch to next or prev or no image after deleting
     if (_images.empty())
         return;
 
@@ -228,7 +232,7 @@ void ImageViewport::DeleteImage() {
     std::filesystem::rename(GetCurrentImage().filepath, _config.trashDir + GetCurrentImage().filename);
 
     const std::string rawImageFileName = GetCurrentImage().filenameNoExt + _config.rawImageExt;
-    const std::string rawImage = _config.rawImageDir + rawImageFileName;
+    const std::string rawImage = _config.rawImagePath + rawImageFileName;
     if (std::filesystem::exists(rawImage)) {
         logger::log("moving: \"%s\" to \"%s\"", rawImage.c_str(), _config.trashDir.c_str());
         std::filesystem::rename(rawImage, _config.trashDir + rawImageFileName);
@@ -257,8 +261,8 @@ void ImageViewport::LoadCurrentImage(const char* path) {
     Timer t{ "LoadCurrentImage(const char* path)" };
 
     // TODO: check if loading images this way is fine
-    int comp = 0;
-    Image image;
+    int comp = 0; // image components (R, G, B, A)
+    Image image{};
 
     {
         Timer tt{ "Loading image from memory" };
@@ -272,14 +276,18 @@ void ImageViewport::LoadCurrentImage(const char* path) {
         );
     }
 
-    if (image.data != NULL)
-    {
-        image.mipmaps = 1;
+    if (image.data == nullptr)
+        return; // TODO: handle this case
 
-        if (comp == 1) image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
-        else if (comp == 2) image.format = PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;
-        else if (comp == 3) image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
-        else if (comp == 4) image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image.mipmaps = 1;
+    if (comp == 1) {
+        image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
+    } else if (comp == 2) {
+        image.format = PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;
+    } else if (comp == 3) {
+        image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+    } else if (comp == 4) {
+        image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
     }
 
     tinyexif::EXIFInfo data;
@@ -288,6 +296,7 @@ void ImageViewport::LoadCurrentImage(const char* path) {
         GetCurrentImage().dataSize
     );
 
+    // check for error when parsing EXIF data
     if (code == PARSE_EXIF_ERROR_NO_EXIF) {
         logger::info("EXIF data not found!");
     } else if (code == PARSE_EXIF_ERROR_NO_JPEG) {
@@ -297,11 +306,13 @@ void ImageViewport::LoadCurrentImage(const char* path) {
     } else if (code == PARSE_EXIF_ERROR_CORRUPT) {
         logger::error("Error reading EXIF data (DATA CORRUPTED)!");
     } else {
+        // no error
         PrintEXIFData(data);
     }
 
     _texture = LoadTextureFromImage(image);
-    _aspectRatio = static_cast<float>(image.width) / static_cast<float>(image.height);
+    _aspectRatio = 
+        static_cast<float>(image.width) / static_cast<float>(image.height);
     _srcRectangle = {
         .x = 0.0f,
         .y = 0.0f,
@@ -319,10 +330,12 @@ void ImageViewport::UnloadCurrentImage() {
 
 void ImageViewport::PrintEXIFData(const tinyexif::EXIFInfo& data) {
     logger::info("Exif data:");
-    logger::info("    Camera       : %s (%s)", data.Make.c_str(), data.Model.c_str());
+    logger::info("    Camera       : %s (%s)", 
+        data.Make.c_str(), data.Model.c_str());
     logger::info("    Date-time    : %s", data.DateTime.c_str());
     if (data.ExposureTime < 1.0) {
-        logger::info("    Shutter speed: 1/%ds", static_cast<int>(1.0f / data.ExposureTime));
+        logger::info("    Shutter speed: 1/%ds", 
+            static_cast<int>(1.0f / data.ExposureTime));
     } else {
         logger::info("    Shutter speed: %.2fs", data.ExposureTime);
     }
@@ -331,40 +344,4 @@ void ImageViewport::PrintEXIFData(const tinyexif::EXIFInfo& data) {
     logger::info("    Focal length : %dmm (%humm equivalent)", 
         static_cast<int>(data.FocalLength), data.FocalLengthIn35mm);
     logger::info("    Orientation  : %hu", data.Orientation);
-
-    // switch (info.orientation) {
-    // case 1:
-    //     break;
-    // case 2: // Flip X
-    //     t.scale(-1.0, 1.0);
-    //     t.translate(-info.width, 0);
-    //     break;
-    // case 3: // PI rotation 
-    //     t.translate(info.width, info.height);
-    //     t.rotate(Math.PI);
-    //     break;
-    // case 4: // Flip Y
-    //     t.scale(1.0, -1.0);
-    //     t.translate(0, -info.height);
-    //     break;
-    // case 5: // - PI/2 and Flip X
-    //     t.rotate(-Math.PI / 2);
-    //     t.scale(-1.0, 1.0);
-    //     break;
-    // case 6: // -PI/2 and -width
-    //     t.translate(info.height, 0);
-    //     t.rotate(Math.PI / 2);
-    //     break;
-    // case 7: // PI/2 and Flip
-    //     t.scale(-1.0, 1.0);
-    //     t.translate(-info.height, 0);
-    //     t.translate(0, info.width);
-    //     t.rotate(  3 * Math.PI / 2);
-    //     break;
-    // case 8: // PI / 2
-    //     t.translate(0, info.width);
-    //     t.rotate(  3 * Math.PI / 2);
-    //     break;
-    // }
-
 }

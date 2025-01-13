@@ -25,12 +25,13 @@ public:
       * Loads images from path list (for dropped files)
       * @param `files` - list of paths
       */
-    void LoadFiles(const FilePathList& files);
+    void LoadFilesFromList(const FilePathList& files);
+
     /**
       * Loads images using directory path
       * @param `path` - path of the directory the images are in
       */
-    void LoadFiles(const char* path);
+    void LoadFilesFromDir(const char* path);
 
     /**
       * Loads images using the path of the image
@@ -39,7 +40,7 @@ public:
     void LoadFile(const char* filePath);
 
 private:
-    inline const ImageDetails& GetCurrentImage() { 
+    inline const ImageDetails& GetCurrentImage() const { 
         return _images[_currentImageIdx]; 
     }
     void CalcDstRectangle();

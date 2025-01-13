@@ -1,6 +1,7 @@
 #include "types.hpp"
 
-#include "cctype"
+#include <filesystem>
+
 #include "logger.hpp"
 #include "timer.hpp"
 
@@ -11,38 +12,24 @@ Config::Config(const char* path,
     : rawImageExt{ rawExt },
       windowWidth{ wWidth },
       windowHeight{ wHeight } {
-    SetImageDirs(path);
+    InitImageDirs(path);
 }
 
-void Config::SetImageDirs(const char* path) {
-    const int64_t len = strlen(path);
-    if (path[len - 1] == '/' )
-        imagePath = path;
-    else
-        imagePath = std::string{ path } + '/';
+void Config::InitImageDirs(const char* path) {
+    // if no path is specified, set it as current path
+    std::string imgDir{ path };
+    if (imgDir.empty()) {
+        imgDir = std::filesystem::current_path().string();
+    }
 
-    rawImageDir = imagePath;
-    trashDir    = imagePath + "trash/";
-}
-
-void Config::SetImageDirs(const char* imgDir, const char* rawImgDir, const char* trDir) {
-    int64_t len = strlen(imgDir);
-    if (imgDir[len - 1] == '/' )
+    if (imgDir[imgDir.length() - 1] == '/' ) {
         imagePath = imgDir;
-    else
-        imagePath = std::string{ imgDir } + '/';
+    } else {
+        imagePath = imgDir + '/';
+    }
 
-    len = strlen(rawImgDir);
-    if (rawImgDir[len - 1] == '/' )
-        rawImageDir = rawImgDir;
-    else
-        rawImageDir = std::string{ rawImgDir } + '/';
-
-    len = strlen(trDir);
-    if (trDir[len - 1] == '/' )
-        trashDir = trDir;
-    else
-        trashDir = std::string{ trDir } + '/';
+    rawImagePath = imagePath;
+    trashDir = imagePath + "trash/";
 }
 
 
@@ -59,7 +46,7 @@ ImageDetails::ImageDetails(const char* path)
         file = fopen(path, "rb");
         if (file == nullptr) {
             logger::error("Failed to load file: %s", path);
-            // TODO: handle failed to load
+            // TODO: handle failed to load (show empty window with a toast msg)
             std::exit(-1);
         }
 
@@ -70,7 +57,7 @@ ImageDetails::ImageDetails(const char* path)
         if (fread(data, sizeof(unsigned char), dataSize, file) != dataSize) {
             logger::error("Failed to read file: %s", path);
             delete[] data;
-            // TODO: handle failed to load
+            // TODO: handle failed to load (show empty window with a toast msg)
             std::exit(-1);
         }
 
@@ -97,8 +84,10 @@ ImageDetails::ImageDetails(const ImageDetails& other) {
     filepath = other.filepath;
     filename = other.filename;
     filenameNoExt = other.filenameNoExt;
+
     data = new unsigned char[other.dataSize];
     memcpy(data, other.data, other.dataSize);
+
     dataSize = other.dataSize;
 }
 
@@ -110,21 +99,21 @@ ImageDetails& ImageDetails::operator=(const ImageDetails& other) {
     filepath = other.filepath;
     filename = other.filename;
     filenameNoExt = other.filenameNoExt;
+
     data = new unsigned char[other.dataSize];
     memcpy(data, other.data, other.dataSize);
+
     dataSize = other.dataSize;
 
     return *this;
 }
 
-// TODO: check if these implementations is a proper move constructor and operator or not
 ImageDetails::ImageDetails(ImageDetails&& other) {
     filepath = std::move(other.filepath);
     filename = std::move(other.filename);
     filenameNoExt = std::move(other.filenameNoExt);
     data = other.data;;
     dataSize = other.dataSize;
-
     other.data = nullptr;
     other.dataSize = 0;
 }
@@ -139,7 +128,6 @@ ImageDetails& ImageDetails::operator=(ImageDetails&& other) {
     filenameNoExt = std::move(other.filenameNoExt);
     data = other.data;;
     dataSize = other.dataSize;
-
     other.data = nullptr;
     other.dataSize = 0;
 

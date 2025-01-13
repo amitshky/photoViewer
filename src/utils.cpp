@@ -31,7 +31,7 @@ void ParseArgs(int argc, char* argv[], Config& config) {
                 continue;
             } else if (strcmp(argv[i], "-r") == 0) {
                 // raw image path
-                config.rawImageDir = argv[++i];
+                config.rawImagePath = argv[++i];
                 continue;
             } else if (strcmp(argv[i], "-t") == 0) {
                 // trash path
