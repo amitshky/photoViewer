@@ -13,22 +13,22 @@
 // TODO: refactor this
 //       - application class, input processing
 // TODO: multithreading
-//       - load images in batches in the background and clear 
+//       - load images in batches in the background and clear
 //         the images accordingly
 //       - store loaded images in a stack-like data structure tht will only store
-//         a number of images, and when full will overwrite 
+//         a number of images, and when full will overwrite
 //         the older images (use indices)
 // TODO: hot reloading
 // TODO: CTRL+C to copy image and CTRL+SHIFT+C to copy path
 // TODO: drag the image to copy the image
-// TODO: switch directory using TAB/SHIFT-TAB 
+// TODO: switch directory using TAB/SHIFT-TAB
 //       (i.e., load images from sibling directory)
 // TODO: make raw file extension, path, etc configurable (from a config file)
 
 
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height);
 void OnResize(ImageViewport& viewport, uint64_t& width, uint64_t& height);
-void OnFilesDropped(ImageViewport& viewport);
+void OnFilesDropped(ImageViewport& viewport, Config& config);
 
 
 int main(int argc, char* argv[]) {
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 
         ProcessInput(viewport, config.windowWidth, config.windowHeight);
         OnResize(viewport, config.windowWidth, config.windowHeight);
-        OnFilesDropped(viewport);
+        OnFilesDropped(viewport, config);
     }
 
     viewport.CleanupImages();
@@ -64,13 +64,14 @@ int main(int argc, char* argv[]) {
 
 
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
-    // CTRL+Q to close the window
-    if ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyPressed(KEY_Q)) {
-        glfwSetWindowShouldClose(static_cast<GLFWwindow*>(GetWindowHandle()), GLFW_TRUE);
+    if ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
+            && IsKeyPressed(KEY_Q)) {
+        // CTRL+Q to close the window
+        glfwSetWindowShouldClose(
+            static_cast<GLFWwindow*>(GetWindowHandle()), GLFW_TRUE);
         return;
-    }
-    // "F" to toggle fullscreen
-    else if (IsKeyPressed(KEY_F)) {
+    } else if (IsKeyPressed(KEY_F)) {
+        // "F" to toggle fullscreen
         ToggleFullscreen();
         const int monitor = GetCurrentMonitor();
         SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
@@ -86,16 +87,21 @@ void OnResize(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
 
     width = GetScreenWidth();
     height = GetScreenHeight();
-    const float winAspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    const float winAspectRatio =
+        static_cast<float>(width) / static_cast<float>(height);
     viewport.Resize(width, height);
 }
 
-void OnFilesDropped(ImageViewport& viewport) {
+void OnFilesDropped(ImageViewport& viewport, Config& config) {
     if (!IsFileDropped()) {
         return;
     }
 
     FilePathList files = LoadDroppedFiles();
     viewport.LoadFilesFromList(files);
+    if (files.count > 0) {
+        config.imagePath = GetDirectoryPath(files.paths[0]);
+    }
+
     UnloadDroppedFiles(files);
 }
