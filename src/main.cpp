@@ -97,7 +97,7 @@ void OnFilesDropped(ImageViewport& viewport, Config& config) {
         return;
     }
 
-    FilePathList files = LoadDroppedFiles();
+    const FilePathList files = LoadDroppedFiles();
     viewport.LoadFilesFromList(files);
     if (files.count > 0) {
         config.imagePath = GetDirectoryPath(files.paths[0]);
