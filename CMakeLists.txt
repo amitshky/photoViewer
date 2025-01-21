@@ -22,8 +22,9 @@ target_include_directories(
     ${PROJECT_NAME}
     PUBLIC
     "src/"
-    "./ext/raylib/src/"
     "./ext/"
+    "./ext/raylib/src/"
+    "./ext/imgui/"
 )
 
 target_link_libraries(

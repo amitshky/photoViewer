@@ -1,9 +1,14 @@
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+
+#define GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "raylib.h"
 
 #include "imageViewport.hpp"
 #include "utils.hpp"
-
 
 // TODO: a way to input image directories
 // TODO: display metadata in the viewport
@@ -40,6 +45,17 @@ int main(int argc, char* argv[]) {
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(GetWindowHandle()), true);
+    ImGui_ImplOpenGL3_Init();
+
     ImageViewport viewport{ config };
 
     while(!WindowShouldClose()) {
@@ -51,6 +67,18 @@ int main(int argc, char* argv[]) {
 #ifdef _DEBUG
         DrawFPS(10, 10);
 #endif
+
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+        ImGui::ShowDemoWindow(nullptr);
+        
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         EndDrawing();
 
         ProcessInput(viewport, config.windowWidth, config.windowHeight);
@@ -58,12 +86,20 @@ int main(int argc, char* argv[]) {
         OnFilesDropped(viewport, config);
     }
 
+    // Cleanup
     viewport.CleanupImages();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     CloseWindow();
 }
 
 
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse || io.WantCaptureKeyboard)
+        return;
+
     if ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
             && IsKeyPressed(KEY_Q)) {
         // CTRL+Q to close the window
