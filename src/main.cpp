@@ -1,11 +1,8 @@
+#include <GLFW/glfw3.h>
+#include "raylib.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
-
-#define GLFW_INCLUDE_NONE
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#include "raylib.h"
 
 #include "imageViewport.hpp"
 #include "utils.hpp"
@@ -14,6 +11,7 @@
 // TODO: display metadata in the viewport
 // TODO: check orientation from EXIF data and rotate accordingly
 // TODO: fit image to window after rotating
+// TODO: dont load files to memory on startup
 
 // TODO: refactor this
 //       - application class, input processing
@@ -96,10 +94,7 @@ int main(int argc, char* argv[]) {
 
 
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureMouse || io.WantCaptureKeyboard)
-        return;
-
+    // global keybindings
     if ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
             && IsKeyPressed(KEY_Q)) {
         // CTRL+Q to close the window
@@ -113,6 +108,11 @@ void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
         SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
         OnResize(viewport, width, height);
     }
+
+    // block input if UI is in focus
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse || io.WantCaptureKeyboard)
+        return;
 
     viewport.ProcessKeybindings();
 }

@@ -70,3 +70,6 @@ information.txt
 
 # vim session
 session.vim
+
+# imgui
+imgui.ini
