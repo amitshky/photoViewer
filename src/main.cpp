@@ -32,6 +32,10 @@
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height);
 void OnResize(ImageViewport& viewport, uint64_t& width, uint64_t& height);
 void OnFilesDropped(ImageViewport& viewport, Config& config);
+void InitUI();
+void CleanupUI();
+void BeginUI();
+void EndUI();
 
 
 int main(int argc, char* argv[]) {
@@ -43,17 +47,7 @@ int main(int argc, char* argv[]) {
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
-    // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(GetWindowHandle()), true);
-    ImGui_ImplOpenGL3_Init();
-
+    InitUI();
     ImageViewport viewport{ config };
 
     while(!WindowShouldClose()) {
@@ -66,16 +60,9 @@ int main(int argc, char* argv[]) {
         DrawFPS(10, 10);
 #endif
 
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+        BeginUI();
         ImGui::ShowDemoWindow(nullptr);
-        
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        EndUI();
 
         EndDrawing();
 
@@ -86,14 +73,17 @@ int main(int argc, char* argv[]) {
 
     // Cleanup
     viewport.CleanupImages();
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+    CleanupUI();
     CloseWindow();
 }
 
 
 void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
+    ImGuiIO& io = ImGui::GetIO();
+    // block input if TextInput is active
+    if (io.WantTextInput)
+        return;
+
     // global keybindings
     if ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
             && IsKeyPressed(KEY_Q)) {
@@ -110,7 +100,6 @@ void ProcessInput(ImageViewport& viewport, uint64_t& width, uint64_t& height) {
     }
 
     // block input if UI is in focus
-    ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse || io.WantCaptureKeyboard)
         return;
 
@@ -140,4 +129,34 @@ void OnFilesDropped(ImageViewport& viewport, Config& config) {
     }
 
     UnloadDroppedFiles(files);
+}
+
+void InitUI() {
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(GetWindowHandle()), true);
+    ImGui_ImplOpenGL3_Init();
+}
+
+void CleanupUI() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void BeginUI() {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void EndUI() {
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
