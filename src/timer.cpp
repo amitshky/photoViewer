@@ -2,7 +2,7 @@
 
 #include "logger.hpp"
 
-Timer::Timer(const char* title)
+Timer::Timer(const std::string& title)
     : _title{ title },
       _start{ std::chrono::system_clock::now() },
       _end{} {

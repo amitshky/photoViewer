@@ -47,7 +47,6 @@ private:
     void DeleteImage();
     void ResetCamera();
     void LoadCurrentImage(const char* path);
-    void UnloadCurrentImage();
     static void PrintEXIFData(const tinyexif::EXIFInfo& data);
 
 private:

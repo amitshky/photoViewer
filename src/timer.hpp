@@ -6,7 +6,7 @@
 // TODO: create a macro so that you can set it to nothing in Release build
 class Timer {
 public:
-    Timer(const char* title);
+    Timer(const std::string& title);
     ~Timer();
 
     void Stop();

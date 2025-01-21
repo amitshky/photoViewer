@@ -41,12 +41,13 @@ ImageDetails::ImageDetails(const char* path)
       data{ nullptr } {
     FILE* file;
     {
-        Timer tt{ "File Read" };
+        Timer tt{ "Reading file \"" + filepath + '"' };
 
         file = fopen(path, "rb");
         if (file == nullptr) {
             logger::error("Failed to load file: %s", path);
-            // TODO: handle failed to load (show empty window with a toast msg)
+            // TODO: handle failed to load (show a toast msg)
+            // for toast msg "https://github.com/Patitotective/ImNotify"
             std::exit(-1);
         }
 
@@ -57,7 +58,8 @@ ImageDetails::ImageDetails(const char* path)
         if (fread(data, sizeof(unsigned char), dataSize, file) != dataSize) {
             logger::error("Failed to read file: %s", path);
             delete[] data;
-            // TODO: handle failed to load (show empty window with a toast msg)
+            // TODO: handle failed to load (show a toast msg)
+            // for toast msg "https://github.com/Patitotective/ImNotify"
             std::exit(-1);
         }
 

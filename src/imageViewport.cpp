@@ -46,7 +46,7 @@ void ImageViewport::Display() {
 }
 
 void ImageViewport::CleanupImages() {
-    UnloadCurrentImage();
+    UnloadTexture(_texture);
 }
 
 void ImageViewport::ProcessKeybindings() {
@@ -322,10 +322,6 @@ void ImageViewport::LoadCurrentImage(const char* path) {
 
     UnloadImage(image);
     CalcDstRectangle();
-}
-
-void ImageViewport::UnloadCurrentImage() {
-    UnloadTexture(_texture);
 }
 
 void ImageViewport::PrintEXIFData(const tinyexif::EXIFInfo& data) {

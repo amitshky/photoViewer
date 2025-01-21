@@ -7,14 +7,14 @@
 #include "imageViewport.hpp"
 #include "utils.hpp"
 
+// TODO: dont load files to memory on startup
+// TODO: refactor this
+//       - application class, input processing
 // TODO: a way to input image directories
 // TODO: display metadata in the viewport
 // TODO: check orientation from EXIF data and rotate accordingly
 // TODO: fit image to window after rotating
-// TODO: dont load files to memory on startup
 
-// TODO: refactor this
-//       - application class, input processing
 // TODO: multithreading
 //       - load images in batches in the background and clear
 //         the images accordingly
@@ -50,6 +50,7 @@ int main(int argc, char* argv[]) {
     InitUI();
     ImageViewport viewport{ config };
 
+    bool firstFrame = true;
     while(!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(GetColor(0x282828FF));
@@ -62,6 +63,10 @@ int main(int argc, char* argv[]) {
 
         BeginUI();
         ImGui::ShowDemoWindow(nullptr);
+        if (firstFrame) { // remove focus from imgui windows
+            ImGui::SetWindowFocus(nullptr);
+            firstFrame = false;
+        }
         EndUI();
 
         EndDrawing();
