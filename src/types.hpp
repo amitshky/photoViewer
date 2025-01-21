@@ -1,8 +1,10 @@
 #pragma once
 
+#include "tinyexif/exif.h"
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <optional>
 
 
 class Config {
@@ -35,11 +37,12 @@ private:
 
 struct ImageDetails {
 public:
-    ImageDetails(const char* path);
+    explicit ImageDetails(const char* path);
 
 public:
     std::string filepath; // full path of the file
     std::string filename; // filename with extension
     std::string filenameNoExt; // filename without extension
     std::string extension; // lower-case
+    std::optional<tinyexif::EXIFInfo> exifInfo;
 };

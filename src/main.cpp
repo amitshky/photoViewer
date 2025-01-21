@@ -7,7 +7,6 @@
 #include "imageViewport.hpp"
 #include "utils.hpp"
 
-// TODO: dont load files to memory on startup
 // TODO: refactor this
 //       - application class, input processing
 // TODO: a way to input image directories

@@ -97,6 +97,13 @@ void ImageViewport::ProcessKeybindings() {
     else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {
         DeleteImage();
     }
+    // "I" to print EXIF data
+    else if (IsKeyPressed(KEY_I)) {
+        if (GetCurrentImage().exifInfo.has_value())
+            PrintEXIFData(GetCurrentImage().exifInfo.value());
+        else 
+            logger::info("No EXIF data found!");
+    }
 
     // move camera
     const Vector2 delta = GetMouseDelta();
@@ -124,7 +131,7 @@ void ImageViewport::LoadFile(const char* filePath) {
 }
 
 void ImageViewport::LoadFilesFromList(const FilePathList& files) {
-    Timer t{ "LoadFiles(const FilePathList& files)" };
+    Timer t{ "Loading files from list" };
     if (files.count <= 0)
         return;
 
@@ -160,7 +167,7 @@ void ImageViewport::LoadFilesFromList(const FilePathList& files) {
 }
 
 void ImageViewport::LoadFilesFromDir(const char* path) {
-    Timer t{ "LoadFiles(const char* path)" };
+    Timer t{ "Loading files from directory: \"" + std::string{path} + '"' };
     CleanupImages();
     if (!_images.empty()) {
         _images.clear();
@@ -314,23 +321,23 @@ void ImageViewport::LoadCurrentImage() {
     }
 
     tinyexif::EXIFInfo exifInfo;
-    int code = exifInfo.parseFrom(
+    const int errCode = exifInfo.parseFrom(
         const_cast<const unsigned char*>(imageData),
         imageDataSize
     );
 
     // check for error when parsing EXIF data
-    if (code == PARSE_EXIF_ERROR_NO_EXIF) {
+    if (errCode == PARSE_EXIF_ERROR_NO_EXIF) {
         logger::info("EXIF data not found!");
-    } else if (code == PARSE_EXIF_ERROR_NO_JPEG) {
+    } else if (errCode == PARSE_EXIF_ERROR_NO_JPEG) {
         logger::warn("Cannot parse EXIF data for non-JPEG images!");
-    } else if (code == PARSE_EXIF_ERROR_UNKNOWN_BYTEALIGN) {
+    } else if (errCode == PARSE_EXIF_ERROR_UNKNOWN_BYTEALIGN) {
         logger::error("Error reading EXIF data (UNKNOWN BYTE ALIGNMENT)!");
-    } else if (code == PARSE_EXIF_ERROR_CORRUPT) {
+    } else if (errCode == PARSE_EXIF_ERROR_CORRUPT) {
         logger::error("Error reading EXIF data (DATA CORRUPTED)!");
     } else {
         // no error
-        PrintEXIFData(exifInfo);
+        GetCurrentImage().exifInfo = exifInfo;
     }
 
     _texture = LoadTextureFromImage(image);
