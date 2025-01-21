@@ -86,12 +86,12 @@ void ImageViewport::ProcessKeybindings() {
     // "D" or "Right arrow" to view next image
     else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && _currentImageIdx + 1 < _images.size()) {
         ++_currentImageIdx;
-        LoadCurrentImage(GetCurrentImage().filepath.c_str());
+        LoadCurrentImage();
     }
     // "A" or "Left arrow" to view previous image
     else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && _currentImageIdx - 1 >= 0) {
         --_currentImageIdx;
-        LoadCurrentImage(GetCurrentImage().filepath.c_str());
+        LoadCurrentImage();
     }
     // "Delete" or "X" to delete image as well as raw image (if exists)
     else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {
@@ -155,7 +155,7 @@ void ImageViewport::LoadFilesFromList(const FilePathList& files) {
     if (_images.empty()) {
         logger::info("No images found!");
     } else {
-        LoadCurrentImage(GetCurrentImage().filepath.c_str());
+        LoadCurrentImage();
     }
 }
 
@@ -189,7 +189,7 @@ void ImageViewport::LoadFilesFromDir(const char* path) {
     if (_images.empty()) {
         logger::info("No images found!");
     } else {
-        LoadCurrentImage(GetCurrentImage().filepath.c_str());
+        LoadCurrentImage();
     }
 }
 
@@ -257,24 +257,47 @@ void ImageViewport::ResetCamera() {
     _camera.zoom = 1.0f;
 }
 
-void ImageViewport::LoadCurrentImage(const char* path) {
-    Timer t{ "LoadCurrentImage(const char* path)" };
+void ImageViewport::LoadCurrentImage() {
+    Timer t{ "Loading image \"" + GetCurrentImage().filepath + '"' };
 
-    // TODO: check if loading images this way is fine
+    // read file
+    FILE* file;
+    unsigned char* imageData = nullptr; // image data
+    uint64_t imageDataSize = 0;
+    const char* filepath = GetCurrentImage().filepath.c_str();
+    file = fopen(filepath, "rb");
+    if (file == nullptr) {
+        logger::error("Failed to load file: %s", filepath);
+        imageDataSize = 0;
+        // TODO: handle failed to load (show a toast msg)
+        std::exit(-1);
+    }
+
+    fseek(file, 0, SEEK_END);
+    imageDataSize = ftell(file);
+    rewind(file);
+    imageData = new unsigned char[imageDataSize];
+    if (fread(imageData, sizeof(unsigned char), imageDataSize, file) != imageDataSize) {
+        logger::error("Failed to read file: %s", filepath);
+        delete[] imageData;
+        imageDataSize = 0;
+        // TODO: handle failed to load (show a toast msg)
+        std::exit(-1);
+    }
+
+    fclose(file);
+
     int comp = 0; // image components (R, G, B, A)
     Image image{};
 
-    {
-        Timer tt{ "Loading image from memory" };
-        image.data = stbi_load_from_memory(
-            GetCurrentImage().data,
-            GetCurrentImage().dataSize,
-            &image.width,
-            &image.height,
-            &comp,
-            0
-        );
-    }
+    image.data = stbi_load_from_memory(
+        imageData,
+        imageDataSize,
+        &image.width,
+        &image.height,
+        &comp,
+        0
+    );
 
     if (image.data == nullptr)
         return; // TODO: handle this case
@@ -290,10 +313,10 @@ void ImageViewport::LoadCurrentImage(const char* path) {
         image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
     }
 
-    tinyexif::EXIFInfo data;
-    int code = data.parseFrom(
-        const_cast<const unsigned char*>(GetCurrentImage().data),
-        GetCurrentImage().dataSize
+    tinyexif::EXIFInfo exifInfo;
+    int code = exifInfo.parseFrom(
+        const_cast<const unsigned char*>(imageData),
+        imageDataSize
     );
 
     // check for error when parsing EXIF data
@@ -307,7 +330,7 @@ void ImageViewport::LoadCurrentImage(const char* path) {
         logger::error("Error reading EXIF data (DATA CORRUPTED)!");
     } else {
         // no error
-        PrintEXIFData(data);
+        PrintEXIFData(exifInfo);
     }
 
     _texture = LoadTextureFromImage(image);
@@ -320,24 +343,25 @@ void ImageViewport::LoadCurrentImage(const char* path) {
         .height = static_cast<float>(image.height),
     };
 
+    delete[] imageData;
     UnloadImage(image);
     CalcDstRectangle();
 }
 
-void ImageViewport::PrintEXIFData(const tinyexif::EXIFInfo& data) {
+void ImageViewport::PrintEXIFData(const tinyexif::EXIFInfo& info) {
     logger::info("Exif data:");
     logger::info("    Camera       : %s (%s)", 
-        data.Make.c_str(), data.Model.c_str());
-    logger::info("    Date-time    : %s", data.DateTime.c_str());
-    if (data.ExposureTime < 1.0) {
+        info.Make.c_str(), info.Model.c_str());
+    logger::info("    Date-time    : %s", info.DateTime.c_str());
+    if (info.ExposureTime < 1.0) {
         logger::info("    Shutter speed: 1/%ds", 
-            static_cast<int>(1.0f / data.ExposureTime));
+            static_cast<int>(1.0f / info.ExposureTime));
     } else {
-        logger::info("    Shutter speed: %.2fs", data.ExposureTime);
+        logger::info("    Shutter speed: %.2fs", info.ExposureTime);
     }
-    logger::info("    Aperture     : f%.1f", data.FNumber);
-    logger::info("    ISO          : %hu", data.ISOSpeedRatings);
+    logger::info("    Aperture     : f%.1f", info.FNumber);
+    logger::info("    ISO          : %hu", info.ISOSpeedRatings);
     logger::info("    Focal length : %dmm (%humm equivalent)", 
-        static_cast<int>(data.FocalLength), data.FocalLengthIn35mm);
-    logger::info("    Orientation  : %hu", data.Orientation);
+        static_cast<int>(info.FocalLength), info.FocalLengthIn35mm);
+    logger::info("    Orientation  : %hu", info.Orientation);
 }

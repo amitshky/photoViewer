@@ -36,19 +36,10 @@ private:
 struct ImageDetails {
 public:
     ImageDetails(const char* path);
-    ~ImageDetails();
-
-    // TODO: implement
-    ImageDetails(const ImageDetails&);
-    ImageDetails& operator= (const ImageDetails&);
-    ImageDetails(ImageDetails&&);
-    ImageDetails& operator= (ImageDetails&&);
 
 public:
-    std::string filepath;
+    std::string filepath; // full path of the file
     std::string filename; // filename with extension
     std::string filenameNoExt; // filename without extension
     std::string extension; // lower-case
-    unsigned char* data;
-    uint64_t dataSize;
 };

@@ -43,10 +43,15 @@ private:
     inline const ImageDetails& GetCurrentImage() const { 
         return _images[_currentImageIdx]; 
     }
+
+    inline ImageDetails& GetCurrentImage() { 
+        return _images[_currentImageIdx]; 
+    }
+
     void CalcDstRectangle();
     void DeleteImage();
     void ResetCamera();
-    void LoadCurrentImage(const char* path);
+    void LoadCurrentImage();
     static void PrintEXIFData(const tinyexif::EXIFInfo& data);
 
 private:

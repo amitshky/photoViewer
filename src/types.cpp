@@ -1,9 +1,7 @@
 #include "types.hpp"
 
 #include <filesystem>
-
-#include "logger.hpp"
-#include "timer.hpp"
+#include "raylib.h"
 
 Config::Config(const char* path,
     const char* rawExt,
@@ -37,33 +35,7 @@ ImageDetails::ImageDetails(const char* path)
     : filepath{ path },
       filename{ "" },
       filenameNoExt{ "" },
-      extension{ "" },
-      data{ nullptr } {
-    FILE* file;
-    {
-        Timer tt{ "Reading file \"" + filepath + '"' };
-
-        file = fopen(path, "rb");
-        if (file == nullptr) {
-            logger::error("Failed to load file: %s", path);
-            // TODO: handle failed to load (show a toast msg)
-            std::exit(-1);
-        }
-
-        fseek(file, 0, SEEK_END);
-        dataSize = ftell(file);
-        rewind(file);
-        data = new unsigned char[dataSize];
-        if (fread(data, sizeof(unsigned char), dataSize, file) != dataSize) {
-            logger::error("Failed to read file: %s", path);
-            delete[] data;
-            // TODO: handle failed to load (show a toast msg)
-            std::exit(-1);
-        }
-
-        fclose(file);
-    }
-
+      extension{ "" } {
     filename = GetFileName(path);
     extension = GetFileExtension(filename.c_str());
     for (const auto& ch : filename) {
@@ -74,62 +46,3 @@ ImageDetails::ImageDetails(const char* path)
     }
 }
 
-ImageDetails::~ImageDetails() {
-    delete[] data;
-    data = nullptr;
-    dataSize = 0;
-}
-
-ImageDetails::ImageDetails(const ImageDetails& other) {
-    filepath = other.filepath;
-    filename = other.filename;
-    filenameNoExt = other.filenameNoExt;
-
-    data = new unsigned char[other.dataSize];
-    memcpy(data, other.data, other.dataSize);
-
-    dataSize = other.dataSize;
-}
-
-ImageDetails& ImageDetails::operator=(const ImageDetails& other) {
-    if (&other == this) {
-        return *this;
-    }
-
-    filepath = other.filepath;
-    filename = other.filename;
-    filenameNoExt = other.filenameNoExt;
-
-    data = new unsigned char[other.dataSize];
-    memcpy(data, other.data, other.dataSize);
-
-    dataSize = other.dataSize;
-
-    return *this;
-}
-
-ImageDetails::ImageDetails(ImageDetails&& other) {
-    filepath = std::move(other.filepath);
-    filename = std::move(other.filename);
-    filenameNoExt = std::move(other.filenameNoExt);
-    data = other.data;;
-    dataSize = other.dataSize;
-    other.data = nullptr;
-    other.dataSize = 0;
-}
-
-ImageDetails& ImageDetails::operator=(ImageDetails&& other) {
-    if (&other == this) {
-        return *this;
-    }
-
-    filepath = std::move(other.filepath);
-    filename = std::move(other.filename);
-    filenameNoExt = std::move(other.filenameNoExt);
-    data = other.data;;
-    dataSize = other.dataSize;
-    other.data = nullptr;
-    other.dataSize = 0;
-
-    return *this;
-}
