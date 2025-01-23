@@ -45,7 +45,7 @@ void ImageViewport::Display() {
     EndMode2D();
 }
 
-void ImageViewport::CleanupImages() {
+void ImageViewport::Cleanup() {
     UnloadTexture(_texture);
 }
 
@@ -135,7 +135,7 @@ void ImageViewport::LoadFilesFromList(const FilePathList& files) {
     if (files.count <= 0)
         return;
 
-    CleanupImages();
+    Cleanup();
     if (!_images.empty()) {
         _images.clear();
     }
@@ -168,7 +168,7 @@ void ImageViewport::LoadFilesFromList(const FilePathList& files) {
 
 void ImageViewport::LoadFilesFromDir(const char* path) {
     Timer t{ "Loading files from directory: \"" + std::string{path} + '"' };
-    CleanupImages();
+    Cleanup();
     if (!_images.empty()) {
         _images.clear();
     }

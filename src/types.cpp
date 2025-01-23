@@ -3,6 +3,7 @@
 #include <filesystem>
 #include "raylib.h"
 
+
 Config::Config(const char* path,
     const char* rawExt,
     const uint64_t wWidth,

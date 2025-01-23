@@ -17,7 +17,7 @@ public:
     ImageViewport& operator=(ImageViewport&&) = delete;
 
     void Display();
-    void CleanupImages();
+    void Cleanup();
     void ProcessKeybindings();
     void Resize(const uint64_t width, const uint64_t height);
 
