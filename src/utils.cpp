@@ -5,6 +5,7 @@
 #include <string>
 #include <cstring>
 #include "raylib.h"
+#include "logger.hpp"
 
 namespace utils {
 
@@ -69,6 +70,24 @@ bool IsValidImage(const char* filePath) {
     }
 
     return false;
+}
+
+void PrintEXIFData(const tinyexif::EXIFInfo& info) {
+    logger::info("Exif data:");
+    logger::info("    Camera       : %s (%s)", 
+        info.Make.c_str(), info.Model.c_str());
+    logger::info("    Date-time    : %s", info.DateTime.c_str());
+    if (info.ExposureTime < 1.0) {
+        logger::info("    Shutter speed: 1/%ds", 
+            static_cast<int>(1.0f / info.ExposureTime));
+    } else {
+        logger::info("    Shutter speed: %.2fs", info.ExposureTime);
+    }
+    logger::info("    Aperture     : f%.1f", info.FNumber);
+    logger::info("    ISO          : %hu", info.ISOSpeedRatings);
+    logger::info("    Focal length : %dmm (%humm equivalent)", 
+        static_cast<int>(info.FocalLength), info.FocalLengthIn35mm);
+    logger::info("    Orientation  : %hu", info.Orientation);
 }
 
 }

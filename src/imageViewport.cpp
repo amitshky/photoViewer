@@ -10,23 +10,23 @@
 #include "timer.hpp"
 
 
-ImageViewport::ImageViewport(const Config& config)
-    : _config{ config },
+ImageViewport::ImageViewport(const ImageViewportInfo& info)
+    : _info{ info },
       _currentImageIdx{ 0 },
       _dstRectangle{ 0.0f,  0.0f, 0.0f, 0.0f },
       _camera{},
       _images{},
       _imageRotation{ 0 } {
-    if (std::filesystem::is_directory(_config.imagePath)) {
-        LoadFilesFromDir(_config.imagePath.c_str());
-    } else if (std::filesystem::is_regular_file(_config.imagePath)) {
-        LoadFile(_config.imagePath.c_str());
+    if (std::filesystem::is_directory(_info.imagePath)) {
+        LoadFilesFromDir(_info.imagePath);
+    } else if (std::filesystem::is_regular_file(_info.imagePath)) {
+        LoadFile(_info.imagePath);
     }
 
     ResetCamera();
 }
 
-void ImageViewport::Display() {
+void ImageViewport::Draw() {
     if (_images.empty())
         return;
 
@@ -49,74 +49,15 @@ void ImageViewport::Cleanup() {
     UnloadTexture(_texture);
 }
 
-void ImageViewport::ProcessKeybindings() {
-    const float scroll = GetMouseWheelMove();
-    constexpr float zoomVal = 0.2f;
-    constexpr int32_t rotationVal = 90;
-
-    // "scroll down" or "-" or "S" to zoom out
-    if ((scroll < 0.0f || IsKeyDown(KEY_MINUS) || IsKeyPressed(KEY_S) || IsKeyPressedRepeat(KEY_S))
-        && _camera.zoom > 0.5f
-    ) {
-        _camera.zoom -= zoomVal;
-    }
-    // "scroll up" or "+" or "W" to zoom in
-    else if ((scroll > 0.0f || IsKeyDown(KEY_EQUAL) || IsKeyPressed(KEY_W) || IsKeyPressedRepeat(KEY_W))
-        && _camera.zoom <= 100.0f
-    ) {
-        _camera.zoom += zoomVal;
-    }
-    // "0" or "Z" to reset zoom
-    else if (IsKeyPressed(KEY_ZERO) || IsKeyPressed(KEY_Z)) {
-        _camera.zoom = 1.0f;
-    }
-    // "]" or "E" to rotate clockwise
-    else if (IsKeyPressed(KEY_RIGHT_BRACKET) || IsKeyPressed(KEY_E)) {
-        _imageRotation = (_imageRotation + rotationVal) % 360;
-    }
-    // "[" or "Q" to rotate counter clockwise
-    else if (IsKeyPressed(KEY_LEFT_BRACKET) || IsKeyPressed(KEY_Q)) {
-        _imageRotation = (_imageRotation - rotationVal) % 360;
-    }
-    // "R" to reset image
-    else if (IsKeyPressed(KEY_R)) {
-        ResetCamera();
-        _imageRotation = 0;
-    }
-    // "D" or "Right arrow" to view next image
-    else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) && _currentImageIdx + 1 < _images.size()) {
-        ++_currentImageIdx;
-        LoadCurrentImage();
-    }
-    // "A" or "Left arrow" to view previous image
-    else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) && _currentImageIdx - 1 >= 0) {
-        --_currentImageIdx;
-        LoadCurrentImage();
-    }
-    // "Delete" or "X" to delete image as well as raw image (if exists)
-    else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {
-        DeleteImage();
-    }
-    // "I" to print EXIF data
-    else if (IsKeyPressed(KEY_I)) {
-        if (GetCurrentImage().exifInfo.has_value())
-            PrintEXIFData(GetCurrentImage().exifInfo.value());
-        else 
-            logger::info("No EXIF data found!");
-    }
-
-    // move camera
-    const Vector2 delta = GetMouseDelta();
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        _camera.target.x -= delta.x / _camera.zoom;
-        _camera.target.y -= delta.y / _camera.zoom;
-    }
-}
-
 void ImageViewport::Resize(const uint64_t width, const uint64_t height) {
-    _config.windowWidth = width;
-    _config.windowHeight = height;
-    _camera.offset = Vector2{ static_cast<float>(width) * 0.5f, static_cast<float>(height) * 0.5f };
+    _info.windowWidth = width;
+    _info.windowHeight = height;
+
+    _camera.offset = Vector2{
+        static_cast<float>(width) * 0.5f,
+        static_cast<float>(height) * 0.5f
+    };
+
     CalcDstRectangle();
 }
 
@@ -153,11 +94,7 @@ void ImageViewport::LoadFilesFromList(const FilePathList& files) {
 
     _currentImageIdx = 0;
     CalcDstRectangle();
-    // update image directory
-    // TODO: also update to the config in main.cpp
-    // or dont have copy the entire config object and let main.cpp handle config
-    // or dont update paths here
-    _config.imagePath = GetDirectoryPath(files.paths[0]);
+    UpdateImagePath(GetDirectoryPath(files.paths[0]));
 
     if (_images.empty()) {
         logger::info("No images found!");
@@ -200,24 +137,77 @@ void ImageViewport::LoadFilesFromDir(const char* path) {
     }
 }
 
+void ImageViewport::ZoomIn() {
+    if (_camera.zoom > 100.0f)
+        return;
+
+    _camera.zoom += _zoomVal;
+}
+
+void ImageViewport::ZoomOut() {
+    if (_camera.zoom <= 0.5f)
+        return;
+
+    _camera.zoom -= _zoomVal;
+}
+
+void ImageViewport::ResetZoom() {
+    _camera.zoom = 1.0f;
+}
+
+void ImageViewport::RotateCW() {
+    _imageRotation = (_imageRotation + _rotationVal) % 360;
+}
+
+void ImageViewport::RotateCCW() {
+    _imageRotation = (_imageRotation - _rotationVal) % 360;
+}
+
+void ImageViewport::ResetImage() {
+    ResetCamera();
+        _imageRotation = 0;
+}
+
+void ImageViewport::NextImage() {
+    if (_currentImageIdx + 1 >= _images.size())
+        return;
+
+    ++_currentImageIdx;
+    LoadCurrentImage();
+}
+
+void ImageViewport::PrevImage() {
+    if (_currentImageIdx - 1 < 0)
+        return;
+
+    --_currentImageIdx;
+    LoadCurrentImage();
+}
+
+void ImageViewport::MoveCameraUsingMouse() {
+    const Vector2 delta = GetMouseDelta();
+    _camera.target.x -= delta.x / _camera.zoom;
+    _camera.target.y -= delta.y / _camera.zoom;
+}
+
 void ImageViewport::CalcDstRectangle() {
     if (_images.empty())
         return;
 
-    float w = static_cast<float>(_config.windowWidth);
-    float h = static_cast<float>(_config.windowHeight);
+    float w = static_cast<float>(_info.windowWidth);
+    float h = static_cast<float>(_info.windowHeight);
     const float winAspectRatio = w / h;
 
     if (_aspectRatio < winAspectRatio) {
         // keep the original size if the window is bigger than the image
-        if (_texture.height < _config.windowHeight) {
+        if (_texture.height < _info.windowHeight) {
             h = _texture.height;
         }
         _dstRectangle.width  = h * _aspectRatio;
         _dstRectangle.height = h;
     } else {
         // keep the original size if the window is bigger than the image
-        if (_texture.width < _config.windowWidth) {
+        if (_texture.width < _info.windowWidth) {
             w = _texture.width;
         }
         _dstRectangle.width  = w;
@@ -230,19 +220,19 @@ void ImageViewport::DeleteImage() {
     if (_images.empty())
         return;
 
-    if (!std::filesystem::exists(_config.trashDir)) {
-        std::filesystem::create_directory(_config.trashDir);
+    if (!std::filesystem::exists(_info.trashDir)) {
+        std::filesystem::create_directory(_info.trashDir);
     }
 
     // move the files to `.trash`
-    logger::log("moving: \"%s\" to \"%s\"", GetCurrentImage().filepath.c_str(), _config.trashDir.c_str());
-    std::filesystem::rename(GetCurrentImage().filepath, _config.trashDir + GetCurrentImage().filename);
+    logger::log("moving: \"%s\" to \"%s\"", GetCurrentImage().filepath.c_str(), _info.trashDir);
+    std::filesystem::rename(GetCurrentImage().filepath, _info.trashDir + GetCurrentImage().filename);
 
-    const std::string rawImageFileName = GetCurrentImage().filenameNoExt + _config.rawImageExt;
-    const std::string rawImage = _config.rawImagePath + rawImageFileName;
+    const std::string rawImageFileName = GetCurrentImage().filenameNoExt + _info.rawImageExt;
+    const std::string rawImage = _info.rawImagePath + rawImageFileName;
     if (std::filesystem::exists(rawImage)) {
-        logger::log("moving: \"%s\" to \"%s\"", rawImage.c_str(), _config.trashDir.c_str());
-        std::filesystem::rename(rawImage, _config.trashDir + rawImageFileName);
+        logger::log("moving: \"%s\" to \"%s\"", rawImage.c_str(), _info.trashDir);
+        std::filesystem::rename(rawImage, _info.trashDir + rawImageFileName);
     }
 
     _images.erase(_images.begin() + _currentImageIdx);
@@ -256,8 +246,8 @@ void ImageViewport::DeleteImage() {
 
 void ImageViewport::ResetCamera() {
     _camera.offset = Vector2{
-        .x = static_cast<float>(_config.windowWidth) * 0.5f,
-        .y = static_cast<float>(_config.windowHeight) * 0.5f
+        .x = static_cast<float>(_info.windowWidth) * 0.5f,
+        .y = static_cast<float>(_info.windowHeight) * 0.5f
     };
     _camera.target = Vector2{ 0.0f, 0.0f };
     _camera.rotation = 0.0f;
@@ -355,20 +345,3 @@ void ImageViewport::LoadCurrentImage() {
     CalcDstRectangle();
 }
 
-void ImageViewport::PrintEXIFData(const tinyexif::EXIFInfo& info) {
-    logger::info("Exif data:");
-    logger::info("    Camera       : %s (%s)", 
-        info.Make.c_str(), info.Model.c_str());
-    logger::info("    Date-time    : %s", info.DateTime.c_str());
-    if (info.ExposureTime < 1.0) {
-        logger::info("    Shutter speed: 1/%ds", 
-            static_cast<int>(1.0f / info.ExposureTime));
-    } else {
-        logger::info("    Shutter speed: %.2fs", info.ExposureTime);
-    }
-    logger::info("    Aperture     : f%.1f", info.FNumber);
-    logger::info("    ISO          : %hu", info.ISOSpeedRatings);
-    logger::info("    Focal length : %dmm (%humm equivalent)", 
-        static_cast<int>(info.FocalLength), info.FocalLengthIn35mm);
-    logger::info("    Orientation  : %hu", info.Orientation);
-}

@@ -9,17 +9,22 @@
 
 class ImageViewport {
 public:
-    explicit ImageViewport(const Config& config);
+    explicit ImageViewport(const ImageViewportInfo& info);
 
     ImageViewport(const ImageViewport&) = delete;
     ImageViewport(ImageViewport&&) = delete;
     ImageViewport& operator=(ImageViewport&) = delete;
     ImageViewport& operator=(ImageViewport&&) = delete;
 
-    void Display();
+    void Draw();
     void Cleanup();
-    void ProcessKeybindings();
     void Resize(const uint64_t width, const uint64_t height);
+
+    /**
+      * Loads images using the path of the image
+      * @param `filePath` - file path
+      */
+    void LoadFile(const char* filePath);
 
     /**
       * Loads images from path list (for dropped files)
@@ -33,29 +38,43 @@ public:
       */
     void LoadFilesFromDir(const char* path);
 
-    /**
-      * Loads images using the path of the image
-      * @param `filePath` - file path
-      */
-    void LoadFile(const char* filePath);
+    void ZoomIn();
+    void ZoomOut();
+    void ResetZoom(); // reset the zoom of the image
+    void RotateCW(); // rotate image clockwise
+    void RotateCCW(); // rotate image counter clockwise
+    void ResetImage(); // reset zoom and camera position
+    void NextImage();
+    void PrevImage();
+    void DeleteImage(); // delete the image and raw image (if found)
+    void MoveCameraUsingMouse();
+
+    [[nodiscard]] inline std::optional<tinyexif::EXIFInfo> GetEXIFInfo() const {
+        return GetCurrentImage().exifInfo;
+    }
+
+    inline void UpdateImagePath(const char* path) { _info.imagePath = path; }
+    inline void UpdateRawImagePath(const char* path) { _info.rawImagePath = path; }
+    inline void UpdateTrashDir(const char* path) { _info.trashDir = path; }
+
 
 private:
     inline const ImageDetails& GetCurrentImage() const { 
         return _images[_currentImageIdx]; 
-    }
+}
 
     inline ImageDetails& GetCurrentImage() { 
         return _images[_currentImageIdx]; 
     }
 
     void CalcDstRectangle();
-    void DeleteImage();
     void ResetCamera();
     void LoadCurrentImage();
-    static void PrintEXIFData(const tinyexif::EXIFInfo& data);
 
 private:
-    Config _config;
+    constexpr static float _zoomVal = 0.2f;
+    constexpr static int32_t _rotationVal = 90;
+    ImageViewportInfo _info;
     int64_t _currentImageIdx;
     Rectangle _dstRectangle; // to fit the image to the window
     Camera2D _camera;
