@@ -54,9 +54,9 @@ void Application::Draw() {
     DrawFPS(10, 10);
 #endif
 
-        BeginUI();
-        OnUpdateUI();
-        EndUI();
+    BeginUI();
+    OnUpdateUI();
+    EndUI();
 }
 
 void Application::ProcessInput() {
