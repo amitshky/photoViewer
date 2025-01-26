@@ -83,10 +83,9 @@ void PrintEXIFData(const tinyexif::EXIFInfo& info) {
     } else {
         logger::info("    Shutter speed: %.2fs", info.ExposureTime);
     }
-    logger::info("    Aperture     : f%.1f", info.FNumber);
+    logger::info("    Aperture     : f/%.1f", info.FNumber);
     logger::info("    ISO          : %hu", info.ISOSpeedRatings);
-    logger::info("    Focal length : %dmm (%humm equivalent)", 
-        static_cast<int>(info.FocalLength), info.FocalLengthIn35mm);
+    logger::info("    Focal length : %dmm", static_cast<int>(info.FocalLength));
     logger::info("    Orientation  : %hu", info.Orientation);
 }
 

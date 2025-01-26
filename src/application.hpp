@@ -22,6 +22,7 @@ private:
     void Cleanup();
 
     void Draw();
+    void DrawUI();
     void ProcessInput();
     void OnResize();
     void OnFilesDropped();
@@ -29,4 +30,5 @@ private:
 private:
     Config _config;
     std::unique_ptr<ImageViewport> _viewport;
+    bool _showExifInfo = false;
 };

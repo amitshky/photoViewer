@@ -49,8 +49,8 @@ public:
     void DeleteImage(); // delete the image and raw image (if found)
     void MoveCameraUsingMouse();
 
-    [[nodiscard]] inline std::optional<tinyexif::EXIFInfo> GetEXIFInfo() const {
-        return GetCurrentImage().exifInfo;
+    [[nodiscard]] inline ImageDetails GetCurrentImageInfo() const {
+        return _images[_currentImageIdx];
     }
 
     inline void UpdateImagePath(const char* path) { _info.imagePath = path; }
@@ -60,11 +60,11 @@ public:
 
 private:
     inline const ImageDetails& GetCurrentImage() const { 
-        return _images[_currentImageIdx]; 
-}
+        return _images[_currentImageIdx];
+    }
 
     inline ImageDetails& GetCurrentImage() { 
-        return _images[_currentImageIdx]; 
+        return _images[_currentImageIdx];
     }
 
     void CalcDstRectangle();

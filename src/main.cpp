@@ -2,8 +2,7 @@
 #include "utils.hpp"
 #include "application.hpp"
 
-// TODO: refactor this
-//       - application class, input processing
+
 // TODO: display metadata in the viewport
 // TODO: a way to input image directories
 // TODO: check orientation from EXIF data and rotate accordingly

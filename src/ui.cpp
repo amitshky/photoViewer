@@ -32,15 +32,14 @@ void BeginUI() {
 }
 
 void EndUI() {
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void OnUpdateUI() {
+    // dont focus on any window at startup
     static bool firstFrame = true;
-    ImGui::ShowDemoWindow(nullptr);
     if (firstFrame) { // remove focus from imgui windows
         ImGui::SetWindowFocus(nullptr);
         firstFrame = false;
     }
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+

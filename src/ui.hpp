@@ -5,4 +5,3 @@ void CleanupUI();
 void BeginUI();
 void EndUI();
 
-void OnUpdateUI();

@@ -72,7 +72,6 @@ void ImageViewport::LoadFile(const char* filePath) {
 }
 
 void ImageViewport::LoadFilesFromList(const FilePathList& files) {
-    Timer t{ "Loading files from list" };
     if (files.count <= 0)
         return;
 
@@ -104,7 +103,6 @@ void ImageViewport::LoadFilesFromList(const FilePathList& files) {
 }
 
 void ImageViewport::LoadFilesFromDir(const char* path) {
-    Timer t{ "Loading files from directory: \"" + std::string{path} + '"' };
     Cleanup();
     if (!_images.empty()) {
         _images.clear();

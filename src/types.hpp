@@ -56,3 +56,4 @@ struct ImageViewportInfo {
     uint64_t windowWidth;
     uint64_t windowHeight;
 };
+

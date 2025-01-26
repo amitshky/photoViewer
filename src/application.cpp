@@ -7,7 +7,7 @@
 #include "utils.hpp"
 
 
-Application::Application(const Config& config) 
+Application::Application(const Config& config)
     : _config{ config } {
     Init();
 }
@@ -50,6 +50,10 @@ void Application::Run() {
 
         Draw();
 
+        BeginUI();
+        DrawUI();
+        EndUI();
+
         EndDrawing();
 
         ProcessInput();
@@ -64,10 +68,41 @@ void Application::Draw() {
 #ifdef _DEBUG
     DrawFPS(10, 10);
 #endif
+}
 
-    BeginUI();
-    OnUpdateUI();
-    EndUI();
+void Application::DrawUI() {
+    const ImageDetails imgInfo = _viewport->GetCurrentImageInfo();
+
+    ImGui::Begin("Image Info");
+    ImGui::Text("Name         : %s", imgInfo.filename.c_str());
+
+    if (imgInfo.exifInfo.has_value()) {
+        const tinyexif::EXIFInfo exifInfo = imgInfo.exifInfo.value();
+
+        ImGui::Text("Camera       : %s %s", exifInfo.Make.c_str(), exifInfo.Model.c_str());
+        ImGui::Text("Date-time    : %s", exifInfo.DateTime.c_str());
+
+        if (exifInfo.ExposureTime < 1.0) {
+            ImGui::Text("Shutter speed: 1/%ds",
+                static_cast<int>(1.0f / exifInfo.ExposureTime));
+        } else {
+            ImGui::Text("Shutter speed: %.2fs", exifInfo.ExposureTime);
+        }
+
+        ImGui::Text("Aperture     : f/%.1f", exifInfo.FNumber);
+        ImGui::Text("ISO          : %hu", exifInfo.ISOSpeedRatings);
+        ImGui::Text("Focal length : %dmm", static_cast<int>(exifInfo.FocalLength));
+        ImGui::Text("Orientation  : %hu", exifInfo.Orientation);
+    } else if (imgInfo.extension != ".JPG"
+            && imgInfo.extension != ".jpg"
+            && imgInfo.extension != ".JPEG"
+            && imgInfo.extension != ".jpeg") {
+        ImGui::Text("** Cannot parse EXIF data for non-JPEG images! **");
+    } else {
+        ImGui::Text("** EXIF data not found! **");
+    }
+
+    ImGui::End();
 }
 
 void Application::ProcessInput() {
@@ -98,17 +133,17 @@ void Application::ProcessInput() {
     const float scroll = GetMouseWheelMove();
 
     // "scroll down" or "-" or "S" to zoom out
-    if ((scroll < 0.0f 
-        || IsKeyDown(KEY_MINUS) 
-        || IsKeyPressed(KEY_S) 
+    if ((scroll < 0.0f
+        || IsKeyDown(KEY_MINUS)
+        || IsKeyPressed(KEY_S)
         || IsKeyPressedRepeat(KEY_S))) {
 
         _viewport->ZoomOut();
     }
     // "scroll up" or "+" or "W" to zoom in
-    else if ((scroll > 0.0f 
-        || IsKeyDown(KEY_EQUAL) 
-        || IsKeyPressed(KEY_W) 
+    else if ((scroll > 0.0f
+        || IsKeyDown(KEY_EQUAL)
+        || IsKeyPressed(KEY_W)
         || IsKeyPressedRepeat(KEY_W))) {
 
         _viewport->ZoomIn();
@@ -143,11 +178,7 @@ void Application::ProcessInput() {
     }
     // "I" to print EXIF data
     else if (IsKeyPressed(KEY_I)) {
-        const auto exifInfo = _viewport->GetEXIFInfo();
-        if (exifInfo.has_value())
-            utils::PrintEXIFData(exifInfo.value());
-        else 
-            logger::info("No EXIF data found!");
+        _showExifInfo = !_showExifInfo;
     }
 
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
