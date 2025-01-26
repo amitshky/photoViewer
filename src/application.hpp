@@ -30,5 +30,5 @@ private:
 private:
     Config _config;
     std::unique_ptr<ImageViewport> _viewport;
-    bool _showExifInfo = false;
+    bool _showImageInfo = false;
 };

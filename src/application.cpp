@@ -71,38 +71,7 @@ void Application::Draw() {
 }
 
 void Application::DrawUI() {
-    const ImageDetails imgInfo = _viewport->GetCurrentImageInfo();
-
-    ImGui::Begin("Image Info");
-    ImGui::Text("Name         : %s", imgInfo.filename.c_str());
-
-    if (imgInfo.exifInfo.has_value()) {
-        const tinyexif::EXIFInfo exifInfo = imgInfo.exifInfo.value();
-
-        ImGui::Text("Camera       : %s %s", exifInfo.Make.c_str(), exifInfo.Model.c_str());
-        ImGui::Text("Date-time    : %s", exifInfo.DateTime.c_str());
-
-        if (exifInfo.ExposureTime < 1.0) {
-            ImGui::Text("Shutter speed: 1/%ds",
-                static_cast<int>(1.0f / exifInfo.ExposureTime));
-        } else {
-            ImGui::Text("Shutter speed: %.2fs", exifInfo.ExposureTime);
-        }
-
-        ImGui::Text("Aperture     : f/%.1f", exifInfo.FNumber);
-        ImGui::Text("ISO          : %hu", exifInfo.ISOSpeedRatings);
-        ImGui::Text("Focal length : %dmm", static_cast<int>(exifInfo.FocalLength));
-        ImGui::Text("Orientation  : %hu", exifInfo.Orientation);
-    } else if (imgInfo.extension != ".JPG"
-            && imgInfo.extension != ".jpg"
-            && imgInfo.extension != ".JPEG"
-            && imgInfo.extension != ".jpeg") {
-        ImGui::Text("** Cannot parse EXIF data for non-JPEG images! **");
-    } else {
-        ImGui::Text("** EXIF data not found! **");
-    }
-
-    ImGui::End();
+    ImageInfoWindow(_viewport->GetCurrentImageInfo(), _showImageInfo);
 }
 
 void Application::ProcessInput() {
@@ -178,7 +147,7 @@ void Application::ProcessInput() {
     }
     // "I" to print EXIF data
     else if (IsKeyPressed(KEY_I)) {
-        _showExifInfo = !_showExifInfo;
+        _showImageInfo = !_showImageInfo;
     }
 
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {

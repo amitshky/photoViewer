@@ -43,3 +43,39 @@ void EndUI() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
+void ImageInfoWindow(const ImageDetails& imgInfo, bool show) {
+    if (!show)
+        return;
+
+    ImGui::Begin("Image Info", nullptr, ImGuiWindowFlags_NoFocusOnAppearing);
+    ImGui::SetWindowSize(ImVec2{ 365, 195 });
+    ImGui::Text("Name         : %s", imgInfo.filename.c_str());
+
+    if (imgInfo.exifInfo.has_value()) {
+        const tinyexif::EXIFInfo exifInfo = imgInfo.exifInfo.value();
+
+        ImGui::Text("Camera       : %s %s", exifInfo.Make.c_str(), exifInfo.Model.c_str());
+        ImGui::Text("Date-time    : %s", exifInfo.DateTime.c_str());
+
+        if (exifInfo.ExposureTime < 1.0) {
+            ImGui::Text("Shutter speed: 1/%ds",
+                static_cast<int>(1.0f / exifInfo.ExposureTime));
+        } else {
+            ImGui::Text("Shutter speed: %.2fs", exifInfo.ExposureTime);
+        }
+
+        ImGui::Text("Aperture     : f/%.1f", exifInfo.FNumber);
+        ImGui::Text("ISO          : %hu", exifInfo.ISOSpeedRatings);
+        ImGui::Text("Focal length : %dmm", static_cast<int>(exifInfo.FocalLength));
+        ImGui::Text("Orientation  : %hu", exifInfo.Orientation);
+    } else if (imgInfo.extension != ".JPG"
+            && imgInfo.extension != ".jpg"
+            && imgInfo.extension != ".JPEG"
+            && imgInfo.extension != ".jpeg") {
+        ImGui::Text("** Cannot parse EXIF data for non-JPEG images! **");
+    } else {
+        ImGui::Text("** EXIF data not found! **");
+    }
+
+    ImGui::End();
+}
