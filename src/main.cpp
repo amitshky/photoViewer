@@ -3,7 +3,6 @@
 #include "application.hpp"
 
 
-// TODO: display metadata in the viewport
 // TODO: a way to input image directories
 // TODO: check orientation from EXIF data and rotate accordingly
 // TODO: fit image to window after rotating
