@@ -4,7 +4,10 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "misc/cpp/imgui_stdlib.h"
 
+
+namespace ui {
 
 void InitUI() {
     // Setup Dear ImGui context
@@ -43,6 +46,10 @@ void EndUI() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
+void UnFocusAllWindows() {
+    ImGui::SetWindowFocus(nullptr);
+}
+
 void ImageInfoWindow(const ImageDetails& imgInfo, bool show) {
     if (!show)
         return;
@@ -79,3 +86,23 @@ void ImageInfoWindow(const ImageDetails& imgInfo, bool show) {
 
     ImGui::End();
 }
+
+bool PathInputWindow(ImagePaths& paths) {
+    ImGui::Begin("paths", nullptr, ImGuiWindowFlags_NoFocusOnAppearing);
+    ImGui::SetWindowSize(ImVec2{ 460.0f, 125.0f });
+
+    ImGui::InputTextWithHint("Image path", "enter image path here", 
+        &paths.imagePath);
+    ImGui::InputTextWithHint("Raw image path", "enter raw image path here",
+        &paths.rawImagePath);
+    ImGui::InputTextWithHint("Trash directory", "enter trash directory path here",
+        &paths.trashDir);
+
+    bool apply = ImGui::Button("Apply");
+    
+    ImGui::End();
+
+    return apply;
+}
+
+} // namespace ui

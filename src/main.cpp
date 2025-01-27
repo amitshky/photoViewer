@@ -4,6 +4,7 @@
 
 
 // TODO: a way to input image directories
+// TODO: write the readme
 // TODO: check orientation from EXIF data and rotate accordingly
 // TODO: fit image to window after rotating
 

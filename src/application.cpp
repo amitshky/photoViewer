@@ -1,10 +1,8 @@
 #include "application.hpp"
 
 #include <GLFW/glfw3.h>
-#include "logger.hpp"
 #include "imgui.h"
 #include "ui.hpp"
-#include "utils.hpp"
 
 
 Application::Application(const Config& config)
@@ -17,13 +15,17 @@ Application::~Application() {
 }
 
 void Application::Init() {
+    _paths.imagePath = _config.imagePath;
+    _paths.rawImagePath = _config.rawImagePath;
+    _paths.trashDir = _config.trashDir;
+
     // init raylib
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(_config.windowWidth, _config.windowHeight, "Photo Viewer");
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
-    InitUI();
+    ui::InitUI();
 
     const ImageViewportInfo viewportInfo{
         .imagePath = _config.imagePath.c_str(),
@@ -38,7 +40,7 @@ void Application::Init() {
 
 void Application::Cleanup() {
     _viewport->Cleanup();
-    CleanupUI();
+    ui::CleanupUI();
     // cleanup raylib
     CloseWindow();
 }
@@ -50,9 +52,9 @@ void Application::Run() {
 
         Draw();
 
-        BeginUI();
+        ui::BeginUI();
         DrawUI();
-        EndUI();
+        ui::EndUI();
 
         EndDrawing();
 
@@ -71,7 +73,17 @@ void Application::Draw() {
 }
 
 void Application::DrawUI() {
-    ImageInfoWindow(_viewport->GetCurrentImageInfo(), _showImageInfo);
+    if (!_showUI) {
+        return;
+    }
+
+    ui::ImageInfoWindow(_viewport->GetCurrentImageInfo(), _showImageInfo);
+
+    if (ui::PathInputWindow(_paths)) {
+        _config.imagePath = _paths.imagePath;
+        _config.rawImagePath = _paths.rawImagePath;
+        _config.trashDir = _paths.trashDir;
+    }
 }
 
 void Application::ProcessInput() {
@@ -148,6 +160,14 @@ void Application::ProcessInput() {
     // "I" to print EXIF data
     else if (IsKeyPressed(KEY_I)) {
         _showImageInfo = !_showImageInfo;
+    }
+    // "H" to show/hide UI
+    else if (IsKeyPressed(KEY_H)) {
+        _showUI = !_showUI;
+    }
+    // "Esc" to unfocus all windows
+    else if (IsKeyPressed(KEY_ESCAPE)) {
+        ui::UnFocusAllWindows();
     }
 
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
