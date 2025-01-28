@@ -6,6 +6,8 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "misc/cpp/imgui_stdlib.h"
 
+#include "logger.hpp"
+
 
 namespace ui {
 
@@ -16,7 +18,8 @@ void InitUI() {
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(GetWindowHandle()), true);
     ImGui_ImplOpenGL3_Init();
@@ -35,7 +38,7 @@ void BeginUI() {
 }
 
 void EndUI() {
-    // dont focus on any window at startup
+    // dont focus on any window on startup
     static bool firstFrame = true;
     if (firstFrame) { // remove focus from imgui windows
         ImGui::SetWindowFocus(nullptr);
@@ -56,7 +59,7 @@ void ImageInfoWindow(const ImageDetails& imgInfo, bool show) {
 
     ImGui::Begin("Image Info", nullptr, ImGuiWindowFlags_NoFocusOnAppearing);
     ImGui::SetWindowSize(ImVec2{ 365, 195 });
-    ImGui::Text("Name         : %s", imgInfo.filename.c_str());
+    ImGui::Text("File name    : %s", imgInfo.filename.c_str());
 
     if (imgInfo.exifInfo.has_value()) {
         const tinyexif::EXIFInfo exifInfo = imgInfo.exifInfo.value();
@@ -99,7 +102,11 @@ bool PathInputWindow(ImagePaths& paths) {
         &paths.trashDir);
 
     bool apply = ImGui::Button("Apply");
-    
+
+    if (ImGui::IsWindowFocused() && IsKeyPressed(KEY_ENTER)) {
+        apply = true;
+    }
+
     ImGui::End();
 
     return apply;

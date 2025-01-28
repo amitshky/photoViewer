@@ -27,6 +27,8 @@ private:
     void OnResize();
     void OnFilesDropped();
 
+    void UpdateImagePaths();
+
 private:
     Config _config;
     std::unique_ptr<ImageViewport> _viewport;

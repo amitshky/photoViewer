@@ -73,20 +73,13 @@ void Application::Draw() {
 }
 
 void Application::DrawUI() {
-    if (!_showUI) {
+    if (!_showUI)
         return;
-    }
 
     ui::ImageInfoWindow(_viewport->GetCurrentImageInfo(), _showImageInfo);
 
     if (ui::PathInputWindow(_paths)) {
-        _config.imagePath = _paths.imagePath;
-        _config.rawImagePath = _paths.rawImagePath;
-        _config.trashDir = _paths.trashDir;
-
-        _viewport->UpdateImagePath(_config.imagePath.c_str());
-        _viewport->UpdateImagePath(_config.rawImagePath.c_str());
-        _viewport->UpdateImagePath(_config.trashDir.c_str());
+        UpdateImagePaths();
     }
 }
 
@@ -203,4 +196,14 @@ void Application::OnFilesDropped() {
     }
 
     UnloadDroppedFiles(files);
+}
+
+void Application::UpdateImagePaths() {
+    _config.imagePath = _paths.imagePath;
+    _config.rawImagePath = _paths.rawImagePath;
+    _config.trashDir = _paths.trashDir;
+
+    _viewport->UpdateImagePath(_config.imagePath.c_str());
+    _viewport->UpdateImagePath(_config.rawImagePath.c_str());
+    _viewport->UpdateImagePath(_config.trashDir.c_str());
 }
