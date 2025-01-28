@@ -83,6 +83,10 @@ void Application::DrawUI() {
         _config.imagePath = _paths.imagePath;
         _config.rawImagePath = _paths.rawImagePath;
         _config.trashDir = _paths.trashDir;
+
+        _viewport->UpdateImagePath(_config.imagePath.c_str());
+        _viewport->UpdateImagePath(_config.rawImagePath.c_str());
+        _viewport->UpdateImagePath(_config.trashDir.c_str());
     }
 }
 
