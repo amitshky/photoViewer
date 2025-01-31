@@ -1,5 +1,6 @@
 #! /bin/sh
 
+export PATH=$PATH:"$PWD/build/rel/src"
 SESSION="photoV"
 
 # check if the session exists

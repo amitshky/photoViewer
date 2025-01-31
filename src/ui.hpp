@@ -11,12 +11,12 @@ void EndUI();
 
 void UnFocusAllWindows();
 
-void ImageInfoWindow(const ImageDetails& imgInfo, bool show);
+void ImageInfoWindow(const std::optional<ImageDetails>& imgInfo, bool show);
 
 /**
   * @returns true if `Apply` button is pressed
   */
-[[nodiscard]] bool PathInputWindow(ImagePaths& paths);
+[[nodiscard]] bool PathsInputWindow(ImagePaths& paths, bool show);
 
 } // namespace ui
 

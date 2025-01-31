@@ -58,13 +58,15 @@ bool IsValidImage(const char* filePath) {
         return false;
     }
 
-    const std::string ext = GetFileExtension(filePath);
-    if (ext == ".png"  ||
-        ext == ".PNG"  ||
-        ext == ".jpg"  ||
-        ext == ".JPG"  ||
-        ext == ".jpeg" ||
-        ext == ".JPEG"
+    const char* ext = GetFileExtension(filePath);
+    if (!ext) {
+        return false;
+    } else if (strcmp(ext, ".png") == 0  ||
+        strcmp(ext, ".PNG") == 0  ||
+        strcmp(ext, ".jpg") == 0  ||
+        strcmp(ext, ".JPG") == 0  ||
+        strcmp(ext, ".jpeg") == 0 ||
+        strcmp(ext, ".JPEG") == 0
     ) {
         return true;
     }

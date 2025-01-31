@@ -329,7 +329,7 @@ void ImageViewport::LoadCurrentImage() {
     }
 
     _texture = LoadTextureFromImage(image);
-    _aspectRatio = 
+    _aspectRatio =
         static_cast<float>(image.width) / static_cast<float>(image.height);
     _srcRectangle = {
         .x = 0.0f,
@@ -342,4 +342,3 @@ void ImageViewport::LoadCurrentImage() {
     UnloadImage(image);
     CalcDstRectangle();
 }
-

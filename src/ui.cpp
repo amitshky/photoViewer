@@ -1,12 +1,12 @@
 #include "ui.hpp"
 
+#include <optional>
+
 #include "raylib.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "misc/cpp/imgui_stdlib.h"
-
-#include "logger.hpp"
 
 
 namespace ui {
@@ -53,16 +53,23 @@ void UnFocusAllWindows() {
     ImGui::SetWindowFocus(nullptr);
 }
 
-void ImageInfoWindow(const ImageDetails& imgInfo, bool show) {
+void ImageInfoWindow(const std::optional<ImageDetails>& imgInfo, bool show) {
     if (!show)
         return;
 
     ImGui::Begin("Image Info", nullptr, ImGuiWindowFlags_NoFocusOnAppearing);
     ImGui::SetWindowSize(ImVec2{ 365, 195 });
-    ImGui::Text("File name    : %s", imgInfo.filename.c_str());
 
-    if (imgInfo.exifInfo.has_value()) {
-        const tinyexif::EXIFInfo exifInfo = imgInfo.exifInfo.value();
+    if (!imgInfo.has_value()) {
+        ImGui::Text("** No images found! **");
+        ImGui::End();
+        return;
+    }
+
+    ImGui::Text("File name    : %s", imgInfo.value().filename.c_str());
+
+    if (imgInfo.value().exifInfo.has_value()) {
+        const tinyexif::EXIFInfo exifInfo = imgInfo.value().exifInfo.value();
 
         ImGui::Text("Camera       : %s %s", exifInfo.Make.c_str(), exifInfo.Model.c_str());
         ImGui::Text("Date-time    : %s", exifInfo.DateTime.c_str());
@@ -78,10 +85,10 @@ void ImageInfoWindow(const ImageDetails& imgInfo, bool show) {
         ImGui::Text("ISO          : %hu", exifInfo.ISOSpeedRatings);
         ImGui::Text("Focal length : %dmm", static_cast<int>(exifInfo.FocalLength));
         ImGui::Text("Orientation  : %hu", exifInfo.Orientation);
-    } else if (imgInfo.extension != ".JPG"
-            && imgInfo.extension != ".jpg"
-            && imgInfo.extension != ".JPEG"
-            && imgInfo.extension != ".jpeg") {
+    } else if (imgInfo.value().extension != ".JPG"
+            && imgInfo.value().extension != ".jpg"
+            && imgInfo.value().extension != ".JPEG"
+            && imgInfo.value().extension != ".jpeg") {
         ImGui::Text("** Cannot parse EXIF data for non-JPEG images! **");
     } else {
         ImGui::Text("** EXIF data not found! **");
@@ -90,7 +97,10 @@ void ImageInfoWindow(const ImageDetails& imgInfo, bool show) {
     ImGui::End();
 }
 
-bool PathInputWindow(ImagePaths& paths) {
+bool PathsInputWindow(ImagePaths& paths, bool show) {
+    if (!show)
+        return false;
+
     ImGui::Begin("paths", nullptr, ImGuiWindowFlags_NoFocusOnAppearing);
     ImGui::SetWindowSize(ImVec2{ 460.0f, 125.0f });
 

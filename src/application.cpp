@@ -1,7 +1,10 @@
 #include "application.hpp"
 
+#include <optional>
 #include <GLFW/glfw3.h>
+
 #include "imgui.h"
+
 #include "ui.hpp"
 
 
@@ -78,7 +81,7 @@ void Application::DrawUI() {
 
     ui::ImageInfoWindow(_viewport->GetCurrentImageInfo(), _showImageInfo);
 
-    if (ui::PathInputWindow(_paths)) {
+    if (ui::PathsInputWindow(_paths, _showPathsInput)) {
         UpdateImagePaths();
     }
 }
@@ -154,9 +157,13 @@ void Application::ProcessInput() {
     else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {
         _viewport->DeleteImage();
     }
-    // "I" to print EXIF data
+    // "I" to show image info
     else if (IsKeyPressed(KEY_I)) {
         _showImageInfo = !_showImageInfo;
+    }
+    // "P" to print EXIF data
+    else if (IsKeyPressed(KEY_P)) {
+        _showPathsInput = !_showPathsInput;
     }
     // "H" to show/hide UI
     else if (IsKeyPressed(KEY_H)) {

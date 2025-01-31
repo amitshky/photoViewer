@@ -3,7 +3,6 @@
 #include <vector>
 #include <cstdint>
 #include "raylib.h"
-#include "tinyexif/exif.h"
 #include "types.hpp"
 
 
@@ -49,7 +48,10 @@ public:
     void DeleteImage(); // delete the image and raw image (if found)
     void MoveCameraUsingMouse();
 
-    [[nodiscard]] inline ImageDetails GetCurrentImageInfo() const {
+    [[nodiscard]] inline std::optional<ImageDetails> GetCurrentImageInfo() const {
+        if (_images.empty())
+            return std::nullopt;
+
         return _images[_currentImageIdx];
     }
 

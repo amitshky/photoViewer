@@ -33,6 +33,7 @@ private:
     Config _config;
     std::unique_ptr<ImageViewport> _viewport;
     bool _showImageInfo = false;
+    bool _showPathsInput = false;
     bool _showUI = true;
     ImagePaths _paths;
 };
