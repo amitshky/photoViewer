@@ -3,6 +3,7 @@
 #include "application.hpp"
 
 
+// TODO: to be able to change raw file extension
 // TODO: write the readme
 // TODO: check orientation from EXIF data and rotate accordingly
 // TODO: fit image to window after rotating

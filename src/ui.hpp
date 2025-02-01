@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include "imgui/imgui_internal.h"
 #include "types.hpp"
 
@@ -23,16 +24,16 @@ ImGuiWindow* CreateImageInfoWindow(
   * 
   * @param `paths` - gets updated when the input text fields are updated
   * @param `show` - to show/hide the window
-  * @param `isApplyTriggered` - is set to true if apply button is pressed
-  * @param `isLoadTriggered` - is set to true if load files button is pressed
+  * @param `fnOnApply` - called when 'apply' button is pressed (or CTRL+ENTER)
+  * @param `fnOnLoadFiles` - called when 'load files' button is pressed (or SHIFT+ENTER)
   * 
   * @returns ImGuiWindow handle
   */
-ImGuiWindow* CreatePathInputWindow(
-    ImagePaths& paths,
+ImGuiWindow* CreateConfigWindow(
+    ImageInfo& paths,
     bool show,
-    bool& isApplyTriggered,
-    bool& isLoadTriggered
+    std::function<void(void)> fnOnApply,
+    std::function<void(void)> fnOnLoadFiles
 );
 
 } // namespace ui

@@ -57,10 +57,11 @@ struct ImageViewportInfo {
     uint64_t windowHeight;
 };
 
-struct ImagePaths {
+struct ImageInfo {
     std::string imagePath;
     std::string rawImagePath;
     std::string trashDir;
+    std::string rawImageExt; // raw file extension
 };
 
 enum class ImageRotation : int32_t {

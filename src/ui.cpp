@@ -93,18 +93,18 @@ ImGuiWindow* CreateImageInfoWindow(const std::optional<ImageDetails>& imgInfo, b
     return handle;
 }
 
-ImGuiWindow* CreatePathInputWindow(
-    ImagePaths& paths,
+ImGuiWindow* CreateConfigWindow(
+    ImageInfo& paths,
     bool show,
-    bool& isApplyTriggered,
-    bool& isLoadTriggered
+    std::function<void(void)> fnOnApply,
+    std::function<void(void)> fnOnLoadFiles
 ) {
     if (!show)
         return nullptr;
 
-    ImGui::Begin("paths", nullptr);
+    ImGui::Begin("Configuration", nullptr);
     ImGuiWindow* handle = ImGui::GetCurrentWindow();
-    ImGui::SetWindowSize(ImVec2{ 460.0f, 125.0f });
+    ImGui::SetWindowSize(ImVec2{ 460.0f, 155.0f });
 
     ImGui::Text("Image path");
     ImGui::SameLine();
@@ -130,20 +130,28 @@ ImGuiWindow* CreatePathInputWindow(
         &paths.trashDir
     );
 
-    isApplyTriggered = ImGui::Button("Apply");
+    ImGui::Text("Raw file extension");
     ImGui::SameLine();
-    isLoadTriggered = ImGui::Button("Load files");
+    ImGui::InputTextWithHint(
+        "##raw_file_ext",
+        "Enter raw file extension here",
+        &paths.rawImageExt
+    );
+
+    const bool apply = ImGui::Button("Apply");
+    ImGui::SameLine();
+    const bool load = ImGui::Button("Load files");
 
     if (ImGui::IsWindowFocused()) {
         // press CTRL+ENTER when window is in focus to trigger `apply`
-        if((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
-            && IsKeyPressed(KEY_ENTER)) {
-            isApplyTriggered = true;
+        if (apply || ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
+                && IsKeyPressed(KEY_ENTER))) {
+            fnOnApply();
         }
         // press SHIFT+ENTER when window is in focus to trigger `load files`
-        else if ((IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
-            && IsKeyPressed(KEY_ENTER)) {
-            isLoadTriggered = true;
+        else if (load || ((IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
+                && IsKeyPressed(KEY_ENTER))) {
+            fnOnLoadFiles();
         }
     }
 

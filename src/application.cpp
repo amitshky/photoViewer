@@ -20,6 +20,7 @@ void Application::Init() {
     _paths.imagePath = _config.imagePath;
     _paths.rawImagePath = _config.rawImagePath;
     _paths.trashDir = _config.trashDir;
+    _paths.rawImageExt = _config.rawImageExt;
 
     // init raylib
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -80,19 +81,16 @@ void Application::DrawUI() {
 
     ui::CreateImageInfoWindow(_viewport->GetCurrentImageInfo(), _showImageInfo);
 
-    bool apply = false;
-    bool load = false;
-    ui::CreatePathInputWindow(_paths, _showPathsInput, apply, load);
-
-    if (apply) {
-        UpdateImagePaths();
-    }
-
-    if (load) {
-        _config.imagePath = _paths.imagePath;
-        _viewport->UpdateImagePath(_config.imagePath.c_str());
-        _viewport->LoadImages(_config.imagePath.c_str());
-    }
+    ui::CreateConfigWindow(
+        _paths,
+        _showPathsInput,
+        [this]() { UpdateImagePaths(); },
+        [this]() {
+            _config.imagePath = _paths.imagePath;
+            _viewport->UpdateImagePath(_config.imagePath.c_str());
+            _viewport->LoadImages(_config.imagePath.c_str());
+        }
+    );
 }
 
 void Application::ProcessInput() {
@@ -227,8 +225,10 @@ void Application::UpdateImagePaths() {
     _config.imagePath = _paths.imagePath;
     _config.rawImagePath = _paths.rawImagePath;
     _config.trashDir = _paths.trashDir;
+    _config.rawImageExt = _paths.rawImageExt;
 
     _viewport->UpdateImagePath(_config.imagePath.c_str());
     _viewport->UpdateRawImagePath(_config.rawImagePath.c_str());
     _viewport->UpdateTrashDir(_config.trashDir.c_str());
+    _viewport->UpdateRawImageExt(_config.rawImageExt.c_str());
 }

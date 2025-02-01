@@ -35,5 +35,5 @@ private:
     bool _showImageInfo = false;
     bool _showPathsInput = false;
     bool _showUI = true;
-    ImagePaths _paths;
+    ImageInfo _paths;
 };

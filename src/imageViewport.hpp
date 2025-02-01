@@ -67,6 +67,7 @@ public:
     inline void UpdateImagePath(const char* path) { _info.imagePath = path; }
     inline void UpdateRawImagePath(const char* path) { _info.rawImagePath = path; }
     inline void UpdateTrashDir(const char* path) { _info.trashDir = path; }
+    inline void UpdateRawImageExt(const char* ext) { _info.rawImageExt = ext; }
 
 
 private:
