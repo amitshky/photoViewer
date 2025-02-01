@@ -177,11 +177,11 @@ void Application::ProcessInput() {
     else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {
         _viewport->DeleteImage();
     }
-    // "I" to show image info
+    // "I" to show image info window
     else if (IsKeyPressed(KEY_I)) {
         _showImageInfo = !_showImageInfo;
     }
-    // "P" to print EXIF data
+    // "P" to show config window
     else if (IsKeyPressed(KEY_P)) {
         _showPathsInput = !_showPathsInput;
     }
