@@ -17,10 +17,10 @@ Application::~Application() {
 }
 
 void Application::Init() {
-    _paths.imagePath = _config.imagePath;
-    _paths.rawImagePath = _config.rawImagePath;
-    _paths.trashDir = _config.trashDir;
-    _paths.rawImageExt = _config.rawImageExt;
+    _imageInfo.imagePath = _config.imagePath;
+    _imageInfo.rawImagePath = _config.rawImagePath;
+    _imageInfo.trashDir = _config.trashDir;
+    _imageInfo.rawImageExt = _config.rawImageExt;
 
     // init raylib
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -82,11 +82,11 @@ void Application::DrawUI() {
     ui::CreateImageInfoWindow(_viewport->GetCurrentImageInfo(), _showImageInfo);
 
     ui::CreateConfigWindow(
-        _paths,
+        _imageInfo,
         _showPathsInput,
-        [this]() { UpdateImagePaths(); },
+        [this]() { UpdateImageInfo(); },
         [this]() {
-            _config.imagePath = _paths.imagePath;
+            _config.imagePath = _imageInfo.imagePath;
             _viewport->UpdateImagePath(_config.imagePath.c_str());
             _viewport->LoadImages(_config.imagePath.c_str());
         }
@@ -221,11 +221,11 @@ void Application::OnFilesDropped() {
     UnloadDroppedFiles(files);
 }
 
-void Application::UpdateImagePaths() {
-    _config.imagePath = _paths.imagePath;
-    _config.rawImagePath = _paths.rawImagePath;
-    _config.trashDir = _paths.trashDir;
-    _config.rawImageExt = _paths.rawImageExt;
+void Application::UpdateImageInfo() {
+    _config.imagePath = _imageInfo.imagePath;
+    _config.rawImagePath = _imageInfo.rawImagePath;
+    _config.trashDir = _imageInfo.trashDir;
+    _config.rawImageExt = _imageInfo.rawImageExt;
 
     _viewport->UpdateImagePath(_config.imagePath.c_str());
     _viewport->UpdateRawImagePath(_config.rawImagePath.c_str());

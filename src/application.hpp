@@ -27,7 +27,7 @@ private:
     void OnResize();
     void OnFilesDropped();
 
-    void UpdateImagePaths();
+    void UpdateImageInfo();
 
 private:
     Config _config;
@@ -35,5 +35,5 @@ private:
     bool _showImageInfo = false;
     bool _showPathsInput = false;
     bool _showUI = true;
-    ImageInfo _paths;
+    ImageInfo _imageInfo; // to temporarily store values from text inputs
 };
