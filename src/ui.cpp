@@ -113,7 +113,8 @@ ImGuiWindow* CreateConfigWindow(
     ImGui::InputTextWithHint(
         "##image_path",
         "Enter image path here",
-        &textFields.imagePath
+        &textFields.imagePath,
+        ImGuiInputTextFlags_ElideLeft
     );
 
     ImGui::NextColumn();
@@ -123,7 +124,8 @@ ImGuiWindow* CreateConfigWindow(
     ImGui::InputTextWithHint(
         "##raw_image_path",
         "Enter raw image path here",
-        &textFields.rawImagePath
+        &textFields.rawImagePath,
+        ImGuiInputTextFlags_ElideLeft
     );
 
     ImGui::NextColumn();
@@ -133,7 +135,8 @@ ImGuiWindow* CreateConfigWindow(
     ImGui::InputTextWithHint(
         "##trash_directory",
         "Enter trash directory path here",
-        &textFields.trashDir
+        &textFields.trashDir,
+        ImGuiInputTextFlags_ElideLeft
     );
 
     ImGui::NextColumn();
