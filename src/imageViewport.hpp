@@ -42,9 +42,11 @@ public:
     void ResetZoom(); // reset the zoom of the image
     void RotateCW(); // rotate image clockwise
     void RotateCCW(); // rotate image counter clockwise
-    void ResetImage(); // reset zoom and camera position
+    void Reset(); // reset zoom and camera position
     void NextImage();
     void PrevImage();
+    void FirstImage();
+    void LastImage();
     void DeleteImage(); // delete the image and raw image (if found)
     void MoveCameraUsingMouse();
 
@@ -70,7 +72,6 @@ private:
     }
 
     void CalcDstRectangle();
-    void ResetCamera();
     void LoadCurrentImage();
 
 private:

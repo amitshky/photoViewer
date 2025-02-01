@@ -7,6 +7,7 @@
 // TODO: write the readme
 // TODO: check orientation from EXIF data and rotate accordingly
 // TODO: fit image to window after rotating
+// TODO: zoom in from where the mouse cursor is
 
 // TODO: multithreading
 //       - load images in batches in the background and clear

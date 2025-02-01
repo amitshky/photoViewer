@@ -143,7 +143,7 @@ void Application::ProcessInput() {
     }
     // "R" to reset image
     else if (IsKeyPressed(KEY_R)) {
-        _viewport->ResetImage();
+        _viewport->Reset();
     }
     // "D" or "Right arrow" to view next image
     else if ((IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT))) {
@@ -152,6 +152,14 @@ void Application::ProcessInput() {
     // "A" or "Left arrow" to view previous image
     else if ((IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))) {
         _viewport->PrevImage();
+    }
+    // "HOME" key to go to the first image
+    else if ((IsKeyPressed(KEY_HOME))) {
+        _viewport->FirstImage();
+    }
+    // "END" key to go to the last image
+    else if ((IsKeyPressed(KEY_END))) {
+        _viewport->LastImage();
     }
     // "Delete" or "X" to delete image as well as raw image (if exists)
     else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {

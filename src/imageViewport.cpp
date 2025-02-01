@@ -22,8 +22,6 @@ ImageViewport::ImageViewport(const ImageViewportInfo& info)
     } else if (std::filesystem::is_regular_file(_info.imagePath)) {
         LoadFile(_info.imagePath);
     }
-
-    ResetCamera();
 }
 
 void ImageViewport::Draw() {
@@ -100,6 +98,8 @@ void ImageViewport::LoadFilesFromList(const FilePathList& files) {
     } else {
         LoadCurrentImage();
     }
+
+    Reset();
 }
 
 void ImageViewport::LoadFilesFromDir(const char* path) {
@@ -133,6 +133,8 @@ void ImageViewport::LoadFilesFromDir(const char* path) {
     } else {
         LoadCurrentImage();
     }
+
+    Reset();
 }
 
 void ImageViewport::ZoomIn() {
@@ -161,9 +163,15 @@ void ImageViewport::RotateCCW() {
     _imageRotation = (_imageRotation - _rotationVal) % 360;
 }
 
-void ImageViewport::ResetImage() {
-    ResetCamera();
-        _imageRotation = 0;
+void ImageViewport::Reset() {
+    _camera.offset = Vector2{
+        .x = static_cast<float>(_info.windowWidth) * 0.5f,
+        .y = static_cast<float>(_info.windowHeight) * 0.5f
+    };
+    _camera.target = Vector2{ 0.0f, 0.0f };
+    _camera.rotation = 0.0f;
+    _camera.zoom = 1.0f;
+    _imageRotation = 0;
 }
 
 void ImageViewport::NextImage() {
@@ -179,6 +187,22 @@ void ImageViewport::PrevImage() {
         return;
 
     --_currentImageIdx;
+    LoadCurrentImage();
+}
+
+void ImageViewport::FirstImage() {
+    if (_images.empty())
+        return;
+ 
+    _currentImageIdx = 0;
+    LoadCurrentImage();
+}
+
+void ImageViewport::LastImage() {
+    if (_images.empty())
+        return;
+
+    _currentImageIdx = _images.size() - 1;
     LoadCurrentImage();
 }
 
@@ -240,16 +264,6 @@ void ImageViewport::DeleteImage() {
         _currentImageIdx = 0;
     }
     CalcDstRectangle();
-}
-
-void ImageViewport::ResetCamera() {
-    _camera.offset = Vector2{
-        .x = static_cast<float>(_info.windowWidth) * 0.5f,
-        .y = static_cast<float>(_info.windowHeight) * 0.5f
-    };
-    _camera.target = Vector2{ 0.0f, 0.0f };
-    _camera.rotation = 0.0f;
-    _camera.zoom = 1.0f;
 }
 
 void ImageViewport::LoadCurrentImage() {
