@@ -2,6 +2,7 @@
 
 #include <optional>
 
+#include "imgui_internal.h"
 #include "raylib.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -38,13 +39,6 @@ void BeginUI() {
 }
 
 void EndUI() {
-    // dont focus on any window on startup
-    static bool firstFrame = true;
-    if (firstFrame) { // remove focus from imgui windows
-        ImGui::SetWindowFocus(nullptr);
-        firstFrame = false;
-    }
-
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -53,17 +47,18 @@ void UnFocusAllWindows() {
     ImGui::SetWindowFocus(nullptr);
 }
 
-void ImageInfoWindow(const std::optional<ImageDetails>& imgInfo, bool show) {
+ImGuiWindow* CreateImageInfoWindow(const std::optional<ImageDetails>& imgInfo, bool show) {
     if (!show)
-        return;
+        return nullptr;
 
     ImGui::Begin("Image Info", nullptr, ImGuiWindowFlags_NoFocusOnAppearing);
-    ImGui::SetWindowSize(ImVec2{ 365, 195 });
+    ImGuiWindow* handle = ImGui::GetCurrentWindow();
+    ImGui::SetWindowSize(ImVec2{ 365.0f, 195.0f });
 
     if (!imgInfo.has_value()) {
         ImGui::Text("** No images found! **");
         ImGui::End();
-        return;
+        return nullptr;
     }
 
     ImGui::Text("File name    : %s", imgInfo.value().filename.c_str());
@@ -95,31 +90,65 @@ void ImageInfoWindow(const std::optional<ImageDetails>& imgInfo, bool show) {
     }
 
     ImGui::End();
+    return handle;
 }
 
-bool PathsInputWindow(ImagePaths& paths, bool show) {
+ImGuiWindow* CreatePathInputWindow(
+    ImagePaths& paths,
+    bool show,
+    bool& isApplyTriggered,
+    bool& isLoadTriggered
+) {
     if (!show)
-        return false;
+        return nullptr;
 
-    ImGui::Begin("paths", nullptr, ImGuiWindowFlags_NoFocusOnAppearing);
+    ImGui::Begin("paths", nullptr);
+    ImGuiWindow* handle = ImGui::GetCurrentWindow();
     ImGui::SetWindowSize(ImVec2{ 460.0f, 125.0f });
 
-    ImGui::InputTextWithHint("Image path", "enter image path here", 
-        &paths.imagePath);
-    ImGui::InputTextWithHint("Raw image path", "enter raw image path here",
-        &paths.rawImagePath);
-    ImGui::InputTextWithHint("Trash directory", "enter trash directory path here",
-        &paths.trashDir);
+    ImGui::Text("Image path");
+    ImGui::SameLine();
+    ImGui::InputTextWithHint(
+        "##image_path",
+        "Enter image path here",
+        &paths.imagePath
+    );
 
-    bool apply = ImGui::Button("Apply");
+    ImGui::Text("Raw image path");
+    ImGui::SameLine();
+    ImGui::InputTextWithHint(
+        "##raw_image_path",
+        "Enter raw image path here",
+        &paths.rawImagePath
+    );
 
-    if (ImGui::IsWindowFocused() && IsKeyPressed(KEY_ENTER)) {
-        apply = true;
+    ImGui::Text("Trash directory path");
+    ImGui::SameLine();
+    ImGui::InputTextWithHint(
+        "##trash_directory",
+        "Enter trash directory path here",
+        &paths.trashDir
+    );
+
+    isApplyTriggered = ImGui::Button("Apply");
+    ImGui::SameLine();
+    isLoadTriggered = ImGui::Button("Load files");
+
+    if (ImGui::IsWindowFocused()) {
+        // press CTRL+ENTER when window is in focus to trigger `apply`
+        if((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
+            && IsKeyPressed(KEY_ENTER)) {
+            isApplyTriggered = true;
+        }
+        // press SHIFT+ENTER when window is in focus to trigger `load files`
+        else if ((IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
+            && IsKeyPressed(KEY_ENTER)) {
+            isLoadTriggered = true;
+        }
     }
 
     ImGui::End();
-
-    return apply;
+    return handle;
 }
 
 } // namespace ui

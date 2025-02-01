@@ -15,9 +15,16 @@ public:
     ImageViewport& operator=(ImageViewport&) = delete;
     ImageViewport& operator=(ImageViewport&&) = delete;
 
-    void Draw();
+    void Init();
     void Cleanup();
+    void Draw();
     void Resize(const uint64_t width, const uint64_t height);
+
+    /**
+      * Checks if `path` is a file or directory to load image(s)
+      * @params `path` - file or directory path
+      */
+    void LoadImages(const char* path);
 
     /**
       * Loads images using the path of the image
@@ -63,6 +70,9 @@ public:
 
 
 private:
+    void CalcDstRectangle();
+    void LoadCurrentImage();
+
     inline const ImageDetails& GetCurrentImage() const { 
         return _images[_currentImageIdx];
     }
@@ -71,8 +81,6 @@ private:
         return _images[_currentImageIdx];
     }
 
-    void CalcDstRectangle();
-    void LoadCurrentImage();
 
 private:
     constexpr static float _zoomVal = 0.2f;
@@ -82,7 +90,7 @@ private:
     Rectangle _dstRectangle; // to fit the image to the window
     Camera2D _camera;
     std::vector<ImageDetails> _images;
-    int32_t _imageRotation;
+    ImageRotation _imageRotation;
 
     Texture2D _texture{};
     Rectangle _srcRectangle{ 0.0f, 0.0f, 0.0f, 0.0f };

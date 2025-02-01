@@ -62,3 +62,10 @@ struct ImagePaths {
     std::string rawImagePath;
     std::string trashDir;
 };
+
+enum class ImageRotation : int32_t {
+    NONE = 0,
+    RIGHT_90 = 90,
+    RIGHT_180 = 180,
+    RIGHT_270 = 270
+};

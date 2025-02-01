@@ -13,15 +13,19 @@
 ImageViewport::ImageViewport(const ImageViewportInfo& info)
     : _info{ info },
       _currentImageIdx{ 0 },
-      _dstRectangle{ 0.0f,  0.0f, 0.0f, 0.0f },
+      _dstRectangle{ 0.0f, 0.0f, 0.0f, 0.0f },
       _camera{},
       _images{},
-      _imageRotation{ 0 } {
-    if (std::filesystem::is_directory(_info.imagePath)) {
-        LoadFilesFromDir(_info.imagePath);
-    } else if (std::filesystem::is_regular_file(_info.imagePath)) {
-        LoadFile(_info.imagePath);
-    }
+      _imageRotation{ ImageRotation::NONE } {
+    Init();
+}
+
+void ImageViewport::Init() {
+   LoadImages(_info.imagePath);
+}
+
+void ImageViewport::Cleanup() {
+    UnloadTexture(_texture);
 }
 
 void ImageViewport::Draw() {
@@ -43,10 +47,6 @@ void ImageViewport::Draw() {
     EndMode2D();
 }
 
-void ImageViewport::Cleanup() {
-    UnloadTexture(_texture);
-}
-
 void ImageViewport::Resize(const uint64_t width, const uint64_t height) {
     _info.windowWidth = width;
     _info.windowHeight = height;
@@ -57,6 +57,14 @@ void ImageViewport::Resize(const uint64_t width, const uint64_t height) {
     };
 
     CalcDstRectangle();
+}
+
+void ImageViewport::LoadImages(const char* path) {
+    if (std::filesystem::is_directory(path)) {
+        LoadFilesFromDir(path);
+    } else if (std::filesystem::is_regular_file(path)) {
+        LoadFile(path);
+    }
 }
 
 void ImageViewport::LoadFile(const char* filePath) {
@@ -156,11 +164,15 @@ void ImageViewport::ResetZoom() {
 }
 
 void ImageViewport::RotateCW() {
-    _imageRotation = (_imageRotation + _rotationVal) % 360;
+    _imageRotation = 
+        static_cast<ImageRotation>((static_cast<int32_t>(_imageRotation)
+        + _rotationVal) % 360);
 }
 
 void ImageViewport::RotateCCW() {
-    _imageRotation = (_imageRotation - _rotationVal) % 360;
+    _imageRotation = 
+        static_cast<ImageRotation>((static_cast<int32_t>(_imageRotation)
+        - _rotationVal) % 360);
 }
 
 void ImageViewport::Reset() {
@@ -171,7 +183,7 @@ void ImageViewport::Reset() {
     _camera.target = Vector2{ 0.0f, 0.0f };
     _camera.rotation = 0.0f;
     _camera.zoom = 1.0f;
-    _imageRotation = 0;
+    _imageRotation = ImageRotation::NONE;
 }
 
 void ImageViewport::NextImage() {
@@ -206,6 +218,43 @@ void ImageViewport::LastImage() {
     LoadCurrentImage();
 }
 
+void ImageViewport::DeleteImage() {
+    // TODO: switch to next or prev or no image after deleting
+    if (_images.empty())
+        return;
+
+    if (!std::filesystem::exists(_info.trashDir)) {
+        std::filesystem::create_directory(_info.trashDir);
+    }
+
+    // move the files to the `trash directory`
+    logger::log("moving: \"%s\" to \"%s\"",
+        GetCurrentImage().filepath.c_str(), _info.trashDir);
+    std::filesystem::rename(
+        GetCurrentImage().filepath,
+        _info.trashDir + GetCurrentImage().filename
+    );
+
+    const std::string rawImageFileName =
+        GetCurrentImage().filenameNoExt + _info.rawImageExt;
+    const std::string rawImage = _info.rawImagePath + rawImageFileName;
+
+    if (std::filesystem::exists(rawImage)) {
+        logger::log("moving: \"%s\" to \"%s\"", rawImage.c_str(), _info.trashDir);
+        std::filesystem::rename(rawImage, _info.trashDir + rawImageFileName);
+    }
+
+    _images.erase(_images.begin() + _currentImageIdx);
+
+    if (_currentImageIdx - 1 >= 0) {
+        --_currentImageIdx;
+    } else {
+        _currentImageIdx = 0;
+    }
+
+    CalcDstRectangle();
+}
+
 void ImageViewport::MoveCameraUsingMouse() {
     const Vector2 delta = GetMouseDelta();
     _camera.target.x -= delta.x / _camera.zoom;
@@ -235,35 +284,6 @@ void ImageViewport::CalcDstRectangle() {
         _dstRectangle.width  = w;
         _dstRectangle.height = w * 1.0f / _aspectRatio;
     }
-}
-
-void ImageViewport::DeleteImage() {
-    // TODO: switch to next or prev or no image after deleting
-    if (_images.empty())
-        return;
-
-    if (!std::filesystem::exists(_info.trashDir)) {
-        std::filesystem::create_directory(_info.trashDir);
-    }
-
-    // move the files to `.trash`
-    logger::log("moving: \"%s\" to \"%s\"", GetCurrentImage().filepath.c_str(), _info.trashDir);
-    std::filesystem::rename(GetCurrentImage().filepath, _info.trashDir + GetCurrentImage().filename);
-
-    const std::string rawImageFileName = GetCurrentImage().filenameNoExt + _info.rawImageExt;
-    const std::string rawImage = _info.rawImagePath + rawImageFileName;
-    if (std::filesystem::exists(rawImage)) {
-        logger::log("moving: \"%s\" to \"%s\"", rawImage.c_str(), _info.trashDir);
-        std::filesystem::rename(rawImage, _info.trashDir + rawImageFileName);
-    }
-
-    _images.erase(_images.begin() + _currentImageIdx);
-    if (_currentImageIdx - 1 >= 0) {
-        --_currentImageIdx;
-    } else {
-        _currentImageIdx = 0;
-    }
-    CalcDstRectangle();
 }
 
 void ImageViewport::LoadCurrentImage() {

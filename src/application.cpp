@@ -1,6 +1,5 @@
 #include "application.hpp"
 
-#include <optional>
 #include <GLFW/glfw3.h>
 
 #include "imgui.h"
@@ -79,10 +78,20 @@ void Application::DrawUI() {
     if (!_showUI)
         return;
 
-    ui::ImageInfoWindow(_viewport->GetCurrentImageInfo(), _showImageInfo);
+    ui::CreateImageInfoWindow(_viewport->GetCurrentImageInfo(), _showImageInfo);
 
-    if (ui::PathsInputWindow(_paths, _showPathsInput)) {
+    bool apply = false;
+    bool load = false;
+    ui::CreatePathInputWindow(_paths, _showPathsInput, apply, load);
+
+    if (apply) {
         UpdateImagePaths();
+    }
+
+    if (load) {
+        _config.imagePath = _paths.imagePath;
+        _viewport->UpdateImagePath(_config.imagePath.c_str());
+        _viewport->LoadImages(_config.imagePath.c_str());
     }
 }
 
@@ -99,12 +108,17 @@ void Application::ProcessInput() {
         glfwSetWindowShouldClose(
             static_cast<GLFWwindow*>(GetWindowHandle()), GLFW_TRUE);
         return;
-    } else if (IsKeyPressed(KEY_F)) {
-        // "F" to toggle fullscreen
+    }
+    // "F" to toggle fullscreen
+    else if (IsKeyPressed(KEY_F)) {
         ToggleFullscreen();
         const int monitor = GetCurrentMonitor();
         SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
         OnResize();
+    }
+    // "Esc" to unfocus all windows
+    else if (IsKeyPressed(KEY_ESCAPE)) {
+        ui::UnFocusAllWindows();
     }
 
     // block input if UI is in focus
@@ -177,10 +191,6 @@ void Application::ProcessInput() {
     else if (IsKeyPressed(KEY_H)) {
         _showUI = !_showUI;
     }
-    // "Esc" to unfocus all windows
-    else if (IsKeyPressed(KEY_ESCAPE)) {
-        ui::UnFocusAllWindows();
-    }
 
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         _viewport->MoveCameraUsingMouse();
@@ -219,6 +229,6 @@ void Application::UpdateImagePaths() {
     _config.trashDir = _paths.trashDir;
 
     _viewport->UpdateImagePath(_config.imagePath.c_str());
-    _viewport->UpdateImagePath(_config.rawImagePath.c_str());
-    _viewport->UpdateImagePath(_config.trashDir.c_str());
+    _viewport->UpdateRawImagePath(_config.rawImagePath.c_str());
+    _viewport->UpdateTrashDir(_config.trashDir.c_str());
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "imgui/imgui_internal.h"
 #include "types.hpp"
 
 namespace ui {
@@ -11,12 +12,28 @@ void EndUI();
 
 void UnFocusAllWindows();
 
-void ImageInfoWindow(const std::optional<ImageDetails>& imgInfo, bool show);
+ImGuiWindow* CreateImageInfoWindow(
+    const std::optional<ImageDetails>& imgInfo,
+    bool show
+);
 
 /**
-  * @returns true if `Apply` button is pressed
+  * Press CTRL+ENTER when window is in focus to trigger `apply`.
+  * Press SHIFT+ENTER when window is in focus to trigger `load files`.
+  * 
+  * @param `paths` - gets updated when the input text fields are updated
+  * @param `show` - to show/hide the window
+  * @param `isApplyTriggered` - is set to true if apply button is pressed
+  * @param `isLoadTriggered` - is set to true if load files button is pressed
+  * 
+  * @returns ImGuiWindow handle
   */
-[[nodiscard]] bool PathsInputWindow(ImagePaths& paths, bool show);
+ImGuiWindow* CreatePathInputWindow(
+    ImagePaths& paths,
+    bool show,
+    bool& isApplyTriggered,
+    bool& isLoadTriggered
+);
 
 } // namespace ui
 
