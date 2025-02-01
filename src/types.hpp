@@ -57,7 +57,7 @@ struct ImageViewportInfo {
     uint64_t windowHeight;
 };
 
-struct ImageInfo {
+struct TextFields {
     std::string imagePath;
     std::string rawImagePath;
     std::string trashDir;

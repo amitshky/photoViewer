@@ -9,7 +9,7 @@ class Application {
 public:
     explicit Application(const Config& config);
     ~Application();
-    
+
     Application(const Application&) = delete;
     Application(Application&&) = delete;
     Application& operator=(const Application&) = delete;
@@ -35,5 +35,5 @@ private:
     bool _showImageInfo = false;
     bool _showPathsInput = false;
     bool _showUI = true;
-    ImageInfo _imageInfo; // to temporarily store values from text inputs
+    TextFields _textFields; // to temporarily store values from text inputs
 };

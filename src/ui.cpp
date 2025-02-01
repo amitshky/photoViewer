@@ -94,7 +94,7 @@ ImGuiWindow* CreateImageInfoWindow(const std::optional<ImageDetails>& imgInfo, b
 }
 
 ImGuiWindow* CreateConfigWindow(
-    ImageInfo& paths,
+    TextFields& textFields,
     bool show,
     std::function<void(void)> fnOnApply,
     std::function<void(void)> fnOnLoadFiles
@@ -104,40 +104,50 @@ ImGuiWindow* CreateConfigWindow(
 
     ImGui::Begin("Configuration", nullptr);
     ImGuiWindow* handle = ImGui::GetCurrentWindow();
-    ImGui::SetWindowSize(ImVec2{ 460.0f, 155.0f });
+    ImGui::SetWindowSize(ImVec2{ 460.0f, 170.0f });
+    ImGui::Columns(2);
+    ImGui::SetColumnWidth(0, 160);
 
     ImGui::Text("Image path");
-    ImGui::SameLine();
+    ImGui::NextColumn();
     ImGui::InputTextWithHint(
         "##image_path",
         "Enter image path here",
-        &paths.imagePath
+        &textFields.imagePath
     );
 
+    ImGui::NextColumn();
     ImGui::Text("Raw image path");
     ImGui::SameLine();
+    ImGui::NextColumn();
     ImGui::InputTextWithHint(
         "##raw_image_path",
         "Enter raw image path here",
-        &paths.rawImagePath
+        &textFields.rawImagePath
     );
 
+    ImGui::NextColumn();
     ImGui::Text("Trash directory path");
     ImGui::SameLine();
+    ImGui::NextColumn();
     ImGui::InputTextWithHint(
         "##trash_directory",
         "Enter trash directory path here",
-        &paths.trashDir
+        &textFields.trashDir
     );
 
+    ImGui::NextColumn();
     ImGui::Text("Raw file extension");
     ImGui::SameLine();
+    ImGui::NextColumn();
     ImGui::InputTextWithHint(
         "##raw_file_ext",
         "Enter raw file extension here",
-        &paths.rawImageExt
+        &textFields.rawImageExt
     );
 
+    ImGui::Columns(1);
+    ImGui::NewLine();
     const bool apply = ImGui::Button("Apply");
     ImGui::SameLine();
     const bool load = ImGui::Button("Load files");

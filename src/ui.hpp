@@ -30,7 +30,7 @@ ImGuiWindow* CreateImageInfoWindow(
   * @returns ImGuiWindow handle
   */
 ImGuiWindow* CreateConfigWindow(
-    ImageInfo& paths,
+    TextFields& paths,
     bool show,
     std::function<void(void)> fnOnApply,
     std::function<void(void)> fnOnLoadFiles

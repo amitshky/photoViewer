@@ -17,10 +17,10 @@ Application::~Application() {
 }
 
 void Application::Init() {
-    _imageInfo.imagePath = _config.imagePath;
-    _imageInfo.rawImagePath = _config.rawImagePath;
-    _imageInfo.trashDir = _config.trashDir;
-    _imageInfo.rawImageExt = _config.rawImageExt;
+    _textFields.imagePath = _config.imagePath;
+    _textFields.rawImagePath = _config.rawImagePath;
+    _textFields.trashDir = _config.trashDir;
+    _textFields.rawImageExt = _config.rawImageExt;
 
     // init raylib
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -82,11 +82,11 @@ void Application::DrawUI() {
     ui::CreateImageInfoWindow(_viewport->GetCurrentImageInfo(), _showImageInfo);
 
     ui::CreateConfigWindow(
-        _imageInfo,
+        _textFields,
         _showPathsInput,
         [this]() { UpdateImageInfo(); },
         [this]() {
-            _config.imagePath = _imageInfo.imagePath;
+            _config.imagePath = _textFields.imagePath;
             _viewport->UpdateImagePath(_config.imagePath.c_str());
             _viewport->LoadImages(_config.imagePath.c_str());
         }
@@ -222,10 +222,10 @@ void Application::OnFilesDropped() {
 }
 
 void Application::UpdateImageInfo() {
-    _config.imagePath = _imageInfo.imagePath;
-    _config.rawImagePath = _imageInfo.rawImagePath;
-    _config.trashDir = _imageInfo.trashDir;
-    _config.rawImageExt = _imageInfo.rawImageExt;
+    _config.imagePath = _textFields.imagePath;
+    _config.rawImagePath = _textFields.rawImagePath;
+    _config.trashDir = _textFields.trashDir;
+    _config.rawImageExt = _textFields.rawImageExt;
 
     _viewport->UpdateImagePath(_config.imagePath.c_str());
     _viewport->UpdateRawImagePath(_config.rawImagePath.c_str());
