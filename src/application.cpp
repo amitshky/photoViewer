@@ -83,7 +83,7 @@ void Application::DrawUI() {
 
     ui::CreateConfigWindow(
         _textFields,
-        _showPathsInput,
+        _showConfig,
         [this]() { UpdateImageInfo(); },
         [this]() {
             _config.imagePath = _textFields.imagePath;
@@ -179,15 +179,16 @@ void Application::ProcessInput() {
     }
     // "I" to show image info window
     else if (IsKeyPressed(KEY_I)) {
-        _showImageInfo = !_showImageInfo;
+        _showImageInfo = !_showImageInfo && _showUI;
     }
     // "P" to show config window
     else if (IsKeyPressed(KEY_P)) {
-        _showPathsInput = !_showPathsInput;
+        _showConfig = !_showConfig && _showUI;
     }
     // "H" to show/hide UI
     else if (IsKeyPressed(KEY_H)) {
-        _showUI = !_showUI;
+        if (_showImageInfo || _showConfig)
+            _showUI = !_showUI;
     }
 
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {

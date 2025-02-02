@@ -4,6 +4,11 @@
 
 
 // TODO: write the readme
+// TODO: create something like a UI manager
+//       - register windows at application init
+//       - store window handles in a hash map or some sort of a data structure
+//       - show/hide windows by traversing the data structure
+//           - so that you can only hide the windows that are visible
 // TODO: check orientation from EXIF data and rotate accordingly
 // TODO: fit image to window after rotating
 // TODO: zoom in from where the mouse cursor is

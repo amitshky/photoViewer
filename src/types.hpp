@@ -47,16 +47,6 @@ public:
     std::optional<tinyexif::EXIFInfo> exifInfo;
 };
 
-struct ImageViewportInfo {
-    const char* imagePath;
-    const char* rawImagePath;
-    const char* trashDir;
-    const char* rawImageExt;
-
-    uint64_t windowWidth;
-    uint64_t windowHeight;
-};
-
 struct TextFields {
     std::string imagePath;
     std::string rawImagePath;
