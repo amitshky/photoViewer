@@ -118,6 +118,21 @@ void Application::ProcessInput() {
     else if (IsKeyPressed(KEY_ESCAPE)) {
         ui::UnFocusAllWindows();
     }
+    // "H" to show/hide UI
+    else if (IsKeyPressed(KEY_H)) {
+        if (_showImageInfo || _showConfig)
+            _showUI = !_showUI;
+    }
+    // "I" to show image info window
+    else if (IsKeyPressed(KEY_I)) {
+        if (_showUI)
+            _showImageInfo = !_showImageInfo;
+    }
+    // "P" to show config window
+    else if (IsKeyPressed(KEY_P)) {
+        if (_showUI)
+            _showConfig = !_showConfig;
+    }
 
     // block input if UI is in focus
     if (io.WantCaptureMouse || io.WantCaptureKeyboard)
@@ -176,19 +191,6 @@ void Application::ProcessInput() {
     // "Delete" or "X" to delete image as well as raw image (if exists)
     else if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_X)) {
         _viewport->DeleteImage();
-    }
-    // "I" to show image info window
-    else if (IsKeyPressed(KEY_I)) {
-        _showImageInfo = !_showImageInfo && _showUI;
-    }
-    // "P" to show config window
-    else if (IsKeyPressed(KEY_P)) {
-        _showConfig = !_showConfig && _showUI;
-    }
-    // "H" to show/hide UI
-    else if (IsKeyPressed(KEY_H)) {
-        if (_showImageInfo || _showConfig)
-            _showUI = !_showUI;
     }
 
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {

@@ -54,7 +54,7 @@ struct TextFields {
     std::string rawImageExt; // raw file extension
 };
 
-enum class ImageRotation : int32_t {
+enum class ImageRotation {
     NONE = 0,
     RIGHT_90 = 90,
     RIGHT_180 = 180,

@@ -119,7 +119,6 @@ ImGuiWindow* CreateConfigWindow(
 
     ImGui::NextColumn();
     ImGui::Text("Raw image path");
-    ImGui::SameLine();
     ImGui::NextColumn();
     ImGui::InputTextWithHint(
         "##raw_image_path",
@@ -130,7 +129,6 @@ ImGuiWindow* CreateConfigWindow(
 
     ImGui::NextColumn();
     ImGui::Text("Trash directory path");
-    ImGui::SameLine();
     ImGui::NextColumn();
     ImGui::InputTextWithHint(
         "##trash_directory",
@@ -141,7 +139,6 @@ ImGuiWindow* CreateConfigWindow(
 
     ImGui::NextColumn();
     ImGui::Text("Raw file extension");
-    ImGui::SameLine();
     ImGui::NextColumn();
     ImGui::InputTextWithHint(
         "##raw_file_ext",

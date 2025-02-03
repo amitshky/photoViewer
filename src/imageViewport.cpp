@@ -171,7 +171,7 @@ void ImageViewport::RotateCW() {
 
 void ImageViewport::RotateCCW() {
     _imageRotation = 
-        static_cast<ImageRotation>((static_cast<int32_t>(_imageRotation)
+        static_cast<ImageRotation>((static_cast<const int32_t>(_imageRotation)
         - _rotationVal) % 360);
 }
 
