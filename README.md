@@ -46,7 +46,7 @@ NOTE: most of these controls will be blocked if a window (UI) is in focus or an 
 - `Esc` - Unfocus all windows (ui)
 - `H` - Show/hide UI
 - `I` - Show/hide image info window
-- `P` - Show/hide config window
+- `P` - Show/hide config window (configure paths for image, raw image and trash directory)
 - `'Scroll up' or '=' or 'W'` - Zoom in
 - `'Scroll down' or '-' or 'S'` - Zoom out
 - `Left click and drag` - move the image
