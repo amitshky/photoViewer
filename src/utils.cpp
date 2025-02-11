@@ -16,12 +16,12 @@ void ParseArgs(int argc, char* argv[], Config& config) {
         // "--help" or "-h" arg
         if (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)) {
             std::cout << "Usage:\n";
-            std::cout << "photoViewer [options] [path/value]\n\n";
+            std::cout << "photoViewer [options] <path/value>\n\n";
             std::cout << "Options:\n";
-            std::cout << "[# NOTE: the paths must end with '/' (eg: \"foo/bar/\")]\n";
-            std::cout << "-i <path>     Path to jpg/png images directory\n";
-            std::cout << "-r <path>     Path to raw images directory\n";
-            std::cout << "-t <path>     Path to trash directory\n";
+            std::cout << "-i <path>     Path to jpg/png image/directory\n";
+            std::cout << "-r <path>     Path to raw image directory\n";
+            std::cout << "-t <path>     Path to trash directory\n"\
+                         "              (the deleted files will be moved here)\n";
             std::cout << "-e <value>    Raw file extension (eg: \".ARW\")\n";
             std::exit(0);
         } else if (i + 1 < argc && strcmp(argv[i + 1], "") != 0) {

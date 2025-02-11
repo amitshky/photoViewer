@@ -123,12 +123,12 @@ void Application::ProcessInput() {
         if (_showImageInfo || _showConfig)
             _showUI = !_showUI;
     }
-    // "I" to show image info window
+    // "I" to show/hide image info window
     else if (IsKeyPressed(KEY_I)) {
         if (_showUI)
             _showImageInfo = !_showImageInfo;
     }
-    // "P" to show config window
+    // "P" to show/hide config window
     else if (IsKeyPressed(KEY_P)) {
         if (_showUI)
             _showConfig = !_showConfig;
@@ -148,7 +148,7 @@ void Application::ProcessInput() {
 
         _viewport->ZoomOut();
     }
-    // "scroll up" or "+" or "W" to zoom in
+    // "scroll up" or "=" or "W" to zoom in
     else if ((scroll > 0.0f
         || IsKeyDown(KEY_EQUAL)
         || IsKeyPressed(KEY_W)
@@ -193,6 +193,7 @@ void Application::ProcessInput() {
         _viewport->DeleteImage();
     }
 
+    // "Left click and drag" to move the image
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         _viewport->MoveCameraUsingMouse();
     }
