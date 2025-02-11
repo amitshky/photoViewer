@@ -41,22 +41,22 @@ cmake --build build/
 ### Controls:
 NOTE: most of these controls will be blocked if a window (UI) is in focus or an input text field is in focus.
 
-`CTRL+Q` - Quit
-`F` - Toggle fullscreen
-`Esc` - Unfocus all windows (ui)
-`H` - Show/hide UI
-`I` - Show/hide image info window
-`P` - Show/hide config window
-`'Scroll up' or '=' or 'W'` - Zoom in
-`'Scroll down' or '-' or 'S'` - Zoom out
-`Left click and drag` - move the image
-`'0' or 'Z'` - Reset zoom
-`']' or 'E'` - Rotate clockwise
-`'[' or 'Q'` - Rotate counter clockwise
-`R` - Reset image (resets zoom, rotation and position)
-`'D' or 'Right arrow'` - Next image
-`'A' or 'Left arrow'` - Previous image
-`Home` - Go to first image
-`End` - Go to last image
-`'X' or 'Delete'` - Delete image (for now the deleted images get moved to `trash` directory, which can be specified)
+- `CTRL+Q` - Quit
+- `F` - Toggle fullscreen
+- `Esc` - Unfocus all windows (ui)
+- `H` - Show/hide UI
+- `I` - Show/hide image info window
+- `P` - Show/hide config window
+- `'Scroll up' or '=' or 'W'` - Zoom in
+- `'Scroll down' or '-' or 'S'` - Zoom out
+- `Left click and drag` - move the image
+- `'0' or 'Z'` - Reset zoom
+- `']' or 'E'` - Rotate clockwise
+- `'[' or 'Q'` - Rotate counter clockwise
+- `R` - Reset image (resets zoom, rotation and position)
+- `'D' or 'Right arrow'` - Next image
+- `'A' or 'Left arrow'` - Previous image
+- `Home` - Go to first image
+- `End` - Go to last image
+- `'X' or 'Delete'` - Delete image (for now the deleted images get moved to `trash` directory, which can be specified)
 
