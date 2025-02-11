@@ -3,7 +3,7 @@
 #include "application.hpp"
 
 
-// TODO: write the readme
+// TODO: add screenshots to readme
 // TODO: create something like a UI manager
 //       - register windows at application init
 //       - store window handles in a hash map or some sort of a data structure
