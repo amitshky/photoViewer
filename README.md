@@ -1,5 +1,5 @@
 # photoViewer
-A photo viewer application written in C++ using [raylib](https://www.raylib.com/) and [ImGui](https://github.com/ocornut/imgui). This application will also delete raw image files (if found). For now, the deleted images will be moved to a trash directory which can be specified. See [Usage](##Usage) section for more information on using the application.
+A photo viewer application written in C++ using [raylib](https://www.raylib.com/) and [ImGui](https://github.com/ocornut/imgui). This application will also delete raw image files (if found). For now, the deleted images will be moved to a trash directory which can be specified. See [Usage](#Usage) section for more information on using the application.
 
 
 ## Prerequisites
