@@ -300,10 +300,10 @@ void ImageViewport::CalcDstRectangle() {
         // when rotated 90 degree, the width of the dstRectangle becomes
         // the height and vice-versa
         if (_dstRectangle.width > _info.windowHeight) {
-            _dstRectangle.width -= (_dstRectangle.width - _info.windowHeight);
+            _dstRectangle.width = _info.windowHeight;
             _dstRectangle.height = (1.0f / _aspectRatio) * _dstRectangle.width;
         } else if (_dstRectangle.height > _info.windowWidth) {
-            _dstRectangle.height -= (_dstRectangle.height - _info.windowWidth);
+            _dstRectangle.height = _info.windowWidth;
             _dstRectangle.width = _aspectRatio * _dstRectangle.height;
         }
     }
