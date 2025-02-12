@@ -60,3 +60,6 @@ NOTE: most of these controls will be blocked if a window (UI) is in focus or an 
 - `End` - Go to last image
 - `'X' or 'Delete'` - Delete image (for now the deleted images get moved to `trash` directory, which can be specified)
 
+
+## Screenshots
+<img src="img/photoV.png" width=450>
