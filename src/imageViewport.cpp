@@ -277,15 +277,15 @@ void ImageViewport::CalcDstRectangle() {
     const float winAspectRatio = w / h;
 
     if (_aspectRatio < winAspectRatio) {
-        // keep the original size if the window is bigger than the image
         if (_texture.height < _info.windowHeight) {
+            // keep the original size if the window is bigger than the image
             h = _texture.height;
         }
         _dstRectangle.width  = h * _aspectRatio;
         _dstRectangle.height = h;
     } else {
-        // keep the original size if the window is bigger than the image
         if (_texture.width < _info.windowWidth) {
+            // keep the original size if the window is bigger than the image
             w = _texture.width;
         }
         _dstRectangle.width  = w;

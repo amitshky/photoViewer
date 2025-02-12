@@ -5,6 +5,8 @@
 
 // FIXME: issue when resizing window (image doesnt fit)
 // TODO: load image directly using stbi_load
+// TODO: rotate image in memory (if the orientation is not correct)
+//       - maybe use opencv and integrate it in this project somehow???
 // TODO: create a viewport to render the images
 // TODO: create something like a UI manager
 //       - register windows at application init

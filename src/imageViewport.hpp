@@ -81,7 +81,16 @@ public:
 
 
 private:
+    /**
+     * resizes `_dstRectangle` based on the window's aspect ratio
+     * this function should be called when the 
+     * window gets resized or when the image is rotated
+     */
     void CalcDstRectangle();
+
+    /**
+     * loads image in the current index in `_images`
+     */
     void LoadCurrentImage();
 
     inline const ImageDetails& GetCurrentImage() const { 
@@ -96,6 +105,7 @@ private:
 private:
     constexpr static float _zoomVal = 0.2f;
     constexpr static int32_t _rotationVal = 90;
+
     ImageViewportInfo _info;
     int64_t _currentImageIdx;
     Rectangle _dstRectangle; // to fit the image to the window
