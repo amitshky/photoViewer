@@ -16,7 +16,8 @@ ImageViewport::ImageViewport(const ImageViewportInfo& info)
       _dstRectangle{ 0.0f, 0.0f, 0.0f, 0.0f },
       _camera{},
       _images{},
-      _imageRotation{ ImageRotation::NONE } {
+      _imageRotation{ ImageRotation::NONE },
+      _originalRotation{ ImageRotation::NONE } {
     Init();
 }
 
@@ -165,14 +166,19 @@ void ImageViewport::ResetZoom() {
 
 void ImageViewport::RotateCW() {
     _imageRotation = 
-        static_cast<ImageRotation>((static_cast<int32_t>(_imageRotation)
+        static_cast<ImageRotation>((static_cast<const uint32_t>(_imageRotation)
         + _rotationVal) % 360);
+    CalcDstRectangle();
 }
 
 void ImageViewport::RotateCCW() {
     _imageRotation = 
-        static_cast<ImageRotation>((static_cast<const int32_t>(_imageRotation)
-        - _rotationVal) % 360);
+        static_cast<ImageRotation>((static_cast<const uint32_t>(_imageRotation)
+        + 3 * _rotationVal) % 360); // subtracting _rotationVal was messing with
+                                    // image orientation (the value would be 
+                                    // negative) so _rotationVal is multiplied by 3 and
+                                    // added, which gives the same effect
+    CalcDstRectangle();
 }
 
 void ImageViewport::Reset() {
@@ -183,7 +189,8 @@ void ImageViewport::Reset() {
     _camera.target = Vector2{ 0.0f, 0.0f };
     _camera.rotation = 0.0f;
     _camera.zoom = 1.0f;
-    _imageRotation = ImageRotation::NONE;
+    _imageRotation = _originalRotation;
+    CalcDstRectangle();
 }
 
 void ImageViewport::NextImage() {
@@ -284,11 +291,28 @@ void ImageViewport::CalcDstRectangle() {
         _dstRectangle.width  = w;
         _dstRectangle.height = w * 1.0f / _aspectRatio;
     }
+
+    // reduce the dstRectangle width or height based on how the image is rotated
+    // so that it fits the window
+    // FIXME: resizing window, doesnt fit images to window sometimes
+    if (_imageRotation == ImageRotation::RIGHT_270
+        || _imageRotation == ImageRotation::RIGHT_90) {
+        // when rotated 90 degree, the width of the dstRectangle becomes
+        // the height and vice-versa
+        if (_dstRectangle.width > _info.windowHeight) {
+            _dstRectangle.width -= (_dstRectangle.width - _info.windowHeight);
+            _dstRectangle.height = (1.0f / _aspectRatio) * _dstRectangle.width;
+        } else if (_dstRectangle.height > _info.windowWidth) {
+            _dstRectangle.height -= (_dstRectangle.height - _info.windowWidth);
+            _dstRectangle.width = _aspectRatio * _dstRectangle.height;
+        }
+    }
 }
 
 void ImageViewport::LoadCurrentImage() {
     Timer t{ "Loading image \"" + GetCurrentImage().filepath + '"' };
 
+    // TODO: load image directly using stbi_load
     // read file
     FILE* file;
     unsigned char* imageData = nullptr; // image data
@@ -342,6 +366,11 @@ void ImageViewport::LoadCurrentImage() {
         image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
     }
 
+    // reset image rotation and
+    // change it later if orientation (exif data) of image is not '1'
+    _originalRotation = ImageRotation::NONE;
+    _imageRotation = ImageRotation::NONE;
+
     tinyexif::EXIFInfo exifInfo;
     const int errCode = exifInfo.parseFrom(
         const_cast<const unsigned char*>(imageData),
@@ -360,6 +389,20 @@ void ImageViewport::LoadCurrentImage() {
     } else {
         // no error
         GetCurrentImage().exifInfo = exifInfo;
+        // rotate the images if the orientation is not correct
+        // ref: https://jdhao.github.io/2019/07/31/image_rotation_exif_info/
+        if (exifInfo.Orientation == 8) {
+            _originalRotation = ImageRotation::RIGHT_270;
+            _imageRotation = _originalRotation;
+        } else if (exifInfo.Orientation == 3) {
+            _originalRotation = ImageRotation::RIGHT_180;
+            _imageRotation = _originalRotation;
+        } else if (exifInfo.Orientation == 6) {
+            _originalRotation = ImageRotation::RIGHT_90;
+            _imageRotation = _originalRotation;
+        }
+
+        CalcDstRectangle();
     }
 
     _texture = LoadTextureFromImage(image);

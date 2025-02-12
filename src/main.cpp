@@ -3,9 +3,8 @@
 #include "application.hpp"
 
 
-// TODO: add screenshots to readme
-// TODO: check orientation from EXIF data and rotate accordingly
-// TODO: fit image to window after rotating
+// FIXME: issue when resizing window (image doesnt fit)
+// TODO: load image directly using stbi_load
 // TODO: create a viewport to render the images
 // TODO: create something like a UI manager
 //       - register windows at application init

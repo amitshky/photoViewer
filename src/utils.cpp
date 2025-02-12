@@ -10,7 +10,6 @@
 namespace utils {
 
 // WARNING: this could break
-// TODO: fix for passing "-i -r" or equivalent
 void ParseArgs(int argc, char* argv[], Config& config) {
     for (int i = 1; i < argc; ++i) {
         // "--help" or "-h" arg

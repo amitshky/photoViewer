@@ -102,6 +102,7 @@ private:
     Camera2D _camera;
     std::vector<ImageDetails> _images;
     ImageRotation _imageRotation;
+    ImageRotation _originalRotation;
 
     Texture2D _texture{};
     Rectangle _srcRectangle{ 0.0f, 0.0f, 0.0f, 0.0f };
