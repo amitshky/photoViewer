@@ -62,4 +62,4 @@ NOTE: most of these controls will be blocked if a window (UI) is in focus or an 
 
 
 ## Screenshots
-<img src="img/photoViewer.png" width=450>
+<img src="img/photoViewer.png">
