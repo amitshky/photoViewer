@@ -275,36 +275,51 @@ void ImageViewport::CalcDstRectangle() {
     float w = static_cast<float>(_info.windowWidth);
     float h = static_cast<float>(_info.windowHeight);
     const float winAspectRatio = w / h;
+    const float invAspectRatio = 1.0f / _aspectRatio;
 
-    if (_aspectRatio < winAspectRatio) {
-        if (_texture.height < _info.windowHeight) {
-            // keep the original size if the window is bigger than the image
-            h = _texture.height;
-        }
-        _dstRectangle.width  = h * _aspectRatio;
-        _dstRectangle.height = h;
-    } else {
-        if (_texture.width < _info.windowWidth) {
-            // keep the original size if the window is bigger than the image
-            w = _texture.width;
-        }
-        _dstRectangle.width  = w;
-        _dstRectangle.height = w * 1.0f / _aspectRatio;
-    }
-
-    // reduce the dstRectangle width or height based on how the image is rotated
-    // so that it fits the window
-    // FIXME: resizing window, doesnt fit images to window sometimes
+    // if the image is rotated, the width becomes the height and vice-versa
+    // so window width is assigned to image height and vice-versa
+    // other wise these two if-else blocks are identical
     if (_imageRotation == ImageRotation::RIGHT_270
         || _imageRotation == ImageRotation::RIGHT_90) {
-        // when rotated 90 degree, the width of the dstRectangle becomes
-        // the height and vice-versa
-        if (_dstRectangle.width > _info.windowHeight) {
-            _dstRectangle.width = _info.windowHeight;
-            _dstRectangle.height = (1.0f / _aspectRatio) * _dstRectangle.width;
-        } else if (_dstRectangle.height > _info.windowWidth) {
-            _dstRectangle.height = _info.windowWidth;
-            _dstRectangle.width = _aspectRatio * _dstRectangle.height;
+        // the window is wider, so fit using window's height
+        if (invAspectRatio < winAspectRatio) {
+            // keep the original size if the window's height is bigger than the image's
+            if (_texture.width < _info.windowHeight) {
+                h = _texture.width;
+            }
+
+            _dstRectangle.height = h * invAspectRatio;
+            _dstRectangle.width = h;
+        }
+        // the image is wider, so fit using window's width
+        else {
+            if (_texture.height < _info.windowWidth) {
+                w = _texture.height;
+            }
+
+            _dstRectangle.height = w;
+            _dstRectangle.width = w * _aspectRatio;
+        }
+    } else {
+        // the window is wider, so fit using window's height
+        if (_aspectRatio < winAspectRatio) {
+            // keep the original size if the window's height is bigger than the image's
+            if (_texture.height < _info.windowHeight) {
+                h = _texture.height;
+            }
+
+            _dstRectangle.width = h * _aspectRatio;
+            _dstRectangle.height = h;
+        }
+        // the image is wider, so fit using window's width
+        else {
+            if (_texture.width < _info.windowWidth) {
+                w = _texture.width;
+            }
+
+            _dstRectangle.width = w;
+            _dstRectangle.height = w * invAspectRatio;
         }
     }
 }
@@ -386,9 +401,11 @@ void ImageViewport::LoadCurrentImage() {
         logger::error("Error reading EXIF data (UNKNOWN BYTE ALIGNMENT)!");
     } else if (errCode == PARSE_EXIF_ERROR_CORRUPT) {
         logger::error("Error reading EXIF data (DATA CORRUPTED)!");
-    } else {
-        // no error
+    } 
+    // no error
+    else {
         GetCurrentImage().exifInfo = exifInfo;
+
         // rotate the images if the orientation is not correct
         // ref: https://jdhao.github.io/2019/07/31/image_rotation_exif_info/
         if (exifInfo.Orientation == 8) {
