@@ -186,10 +186,13 @@ void ImageViewport::Reset() {
         .x = static_cast<float>(_info.windowWidth) * 0.5f,
         .y = static_cast<float>(_info.windowHeight) * 0.5f
     };
+
     _camera.target = Vector2{ 0.0f, 0.0f };
     _camera.rotation = 0.0f;
     _camera.zoom = 1.0f;
+
     _imageRotation = _originalRotation;
+
     CalcDstRectangle();
 }
 
@@ -279,7 +282,8 @@ void ImageViewport::CalcDstRectangle() {
 
     // if the image is rotated, the width becomes the height and vice-versa
     // so window width is assigned to image height and vice-versa
-    // other wise these two if-else blocks are identical
+    // if the image is rotated the aspect ratio is inverse of the original aspect ratio
+    // otherwise these two if-else blocks are identical
     if (_imageRotation == ImageRotation::RIGHT_270
         || _imageRotation == ImageRotation::RIGHT_90) {
         // the window is wider, so fit using window's height
