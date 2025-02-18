@@ -165,17 +165,18 @@ void ImageViewport::ResetZoom() {
 }
 
 void ImageViewport::RotateCW() {
-    _imageRotation = 
-        static_cast<ImageRotation>((static_cast<const uint32_t>(_imageRotation)
-        + _rotationVal) % 360);
+    _imageRotation = static_cast<ImageRotation>(
+        (static_cast<const uint32_t>(_imageRotation) + _rotationVal) % 360
+    );
+
     CalcDstRectangle();
 }
 
 void ImageViewport::RotateCCW() {
-    _imageRotation = 
+    _imageRotation =
         static_cast<ImageRotation>((static_cast<const uint32_t>(_imageRotation)
         + 3 * _rotationVal) % 360); // subtracting _rotationVal was messing with
-                                    // image orientation (the value would be 
+                                    // image orientation (the value would be
                                     // negative) so _rotationVal is multiplied by 3 and
                                     // added, which gives the same effect
     CalcDstRectangle();
@@ -215,7 +216,7 @@ void ImageViewport::PrevImage() {
 void ImageViewport::FirstImage() {
     if (_images.empty())
         return;
- 
+
     _currentImageIdx = 0;
     LoadCurrentImage();
 }
@@ -256,9 +257,18 @@ void ImageViewport::DeleteImage() {
 
     _images.erase(_images.begin() + _currentImageIdx);
 
-    if (_currentImageIdx - 1 >= 0) {
+    if (_currentImageIdx < _images.size() && !_images.empty()) {
+        // after image at `_currentImageIdx` has been removed 
+        // the index points to the next image
+        // so the next image will be loaded
+        LoadCurrentImage();
+    } else if (_currentImageIdx - 1 >= 0) {
+        // if after removing the image at current index
+        // the index is out of bounds, then decrement the index and load the image
         --_currentImageIdx;
+        LoadCurrentImage();
     } else {
+        // here there are no more images, so we reset `_currentImageIdx`
         _currentImageIdx = 0;
     }
 
@@ -329,9 +339,12 @@ void ImageViewport::CalcDstRectangle() {
 }
 
 void ImageViewport::LoadCurrentImage() {
+    if (_images.empty()) {
+        return;
+    }
+
     Timer t{ "Loading image \"" + GetCurrentImage().filepath + '"' };
 
-    // TODO: load image directly using stbi_load
     // read file
     FILE* file;
     unsigned char* imageData = nullptr; // image data
@@ -390,6 +403,9 @@ void ImageViewport::LoadCurrentImage() {
     _originalRotation = ImageRotation::NONE;
     _imageRotation = ImageRotation::NONE;
 
+    // reset the camera
+    Reset();
+
     tinyexif::EXIFInfo exifInfo;
     const int errCode = exifInfo.parseFrom(
         const_cast<const unsigned char*>(imageData),
@@ -405,7 +421,7 @@ void ImageViewport::LoadCurrentImage() {
         logger::error("Error reading EXIF data (UNKNOWN BYTE ALIGNMENT)!");
     } else if (errCode == PARSE_EXIF_ERROR_CORRUPT) {
         logger::error("Error reading EXIF data (DATA CORRUPTED)!");
-    } 
+    }
     // no error
     else {
         GetCurrentImage().exifInfo = exifInfo;

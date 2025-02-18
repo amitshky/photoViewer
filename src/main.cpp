@@ -3,7 +3,7 @@
 #include "application.hpp"
 
 
-// TODO: load image directly using stbi_load
+// FIXME: check if there is '\' at the end of file paths when updating them
 // TODO: create a viewport to render the images
 // TODO: create something like a UI manager
 //       - register windows at application init
